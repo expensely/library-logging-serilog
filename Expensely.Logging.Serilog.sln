@@ -1,0 +1,31 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expensely.Logging.Serilog", "src\Expensely.Logging.Serilog\Expensely.Logging.Serilog.csproj", "{BF383A20-7261-4D7F-92EF-C43D0E313787}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5AE21A5-04AB-4D2F-BBBC-A0DD7778C1D7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{95D94B62-005E-4B76-8C23-EEB7CC506439}"
+ProjectSection(SolutionItems) = preProject
+	LICENSE = LICENSE
+	README.md = README.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{F9B62969-1AA2-48C7-8C8A-5776DAD1561C}"
+ProjectSection(SolutionItems) = preProject
+	pipelines\release.yml = pipelines\release.yml
+EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF383A20-7261-4D7F-92EF-C43D0E313787}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF383A20-7261-4D7F-92EF-C43D0E313787}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF383A20-7261-4D7F-92EF-C43D0E313787}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF383A20-7261-4D7F-92EF-C43D0E313787}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BF383A20-7261-4D7F-92EF-C43D0E313787} = {A5AE21A5-04AB-4D2F-BBBC-A0DD7778C1D7}
+	EndGlobalSection
+EndGlobal

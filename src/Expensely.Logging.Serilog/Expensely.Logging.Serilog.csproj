@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>latestmajor</LangVersion>
+        <Company>Expensely</Company>
+        <Author>Gavan Lamb</Author>
+        <Authors>Gavan Lamb</Authors>
+        <Description>Setup and add Serilog</Description>
+        <PackageId>Expensely.Logging.Serilog</PackageId>
+        <RootNamespace>Expensely.Logging.Serilog</RootNamespace>
+        <PackageProjectUrl>https://github.com/expensely/library-logging-serilog</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/expensely/library-logging-serilog/blob/main/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/expensely/library-logging-serilog</RepositoryUrl>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+
+        <AssemblyVersion>0.0.1</AssemblyVersion>
+        <FileVersion>0.0.1</FileVersion>
+        <PackageVersion>0.0.1</PackageVersion>
+        <Version>0.0.1</Version>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+        <PackageReference Include="Serilog.Enrichers.AspNetCore" Version="1.0.0" />
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="2.1.3" />
+        <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.1" />
+        <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
+        <PackageReference Include="Serilog.Sinks.AwsCloudWatch" Version="4.0.171" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
+        <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    </ItemGroup>
+
+</Project>
