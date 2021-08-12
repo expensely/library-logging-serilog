@@ -10,44 +10,46 @@
 
 ## How to Use  
 ### Configuration  
-| Property Name                      | Description                                                                                                                                         |
-|:-----------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
-| SerilogConfiguration               | Serilog.Settings.Configuration config please go [here](https://github.com/serilog/serilog-settings-configuration/blob/master/README.md) for details |
-| CloudWatch.MinimumLogEventLevel    | The minimum log event level required in order to write an event to the sink                                                                         |
-| CloudWatch.BatchSizeLimit          | The batch size to be used when uploading logs to AWS CloudWatch                                                                                     |
-| CloudWatch.QueueSizeLimit          | The queue size to be used when holding batched log events in memory                                                                                 |
-| CloudWatch.Period                  | The period to be used when a batch upload should be triggered                                                                                       |
-| CloudWatch.LogGroupRetentionPolicy | The number of days to retain the log events in the specified log group                                                                              |
-| CloudWatch.CreateLogGroup          | Flag to indicate if the the log group should be created                                                                                             |
-| CloudWatch.LogGroupName            | The log group name to be used in AWS CloudWatch                                                                                                     |
-| CloudWatch.RetryAttempts           | The number of attempts to retry in the case of a failure                                                                                            |
+| Property Name | Description                                                                                                                  |
+|:--------------|:-----------------------------------------------------------------------------------------------------------------------------|
+| Serilog       | Serilog config please go [here](https://github.com/serilog/serilog-settings-configuration/blob/master/README.md) for details |
 
 Add Configuration
 ``` json
 {
-    "Expensely.Logging.Serilog": {
-        "SerilogConfiguration": {},
-        "CloudWatch": {
-            "MinimumLogEventLevel" : "Verbose",
-            "BatchSizeLimit" : 0,
-            "QueueSizeLimit" : 0,
-            "Period" : "00:00:05",
-            "LogGroupRetentionPolicy" : "TwoWeeks",
-            "CreateLogGroup" : false,
-            "LogGroupName" : "/aws/log/group/name",
-            "RetryAttempts" : 3
+  "Serilog": {
+    "Using":  [
+      "Serilog.Sinks.Console"
+    ],
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Debug",
+        "System": "Debug"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "formatter": "Serilog.Formatting.Compact.RenderedCompactJsonFormatter, Serilog.Formatting.Compact"
         }
+      }
+    ],
+    "Properties": {
+      "Application": "Time"
     }
+  }
 }
 ```
 
 
-Add Expensely.Logging.Serilog
+Add Serilog with configuration
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
     ...
-    service.AddSerilog(Configuration)
+    AddSerilog(Configuration)
     ...
 }
 ```
