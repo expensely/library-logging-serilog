@@ -49,7 +49,7 @@ Add Serilog with configuration
 public void ConfigureServices(IServiceCollection services)
 {
     ...
-    AddSerilog(Configuration)
+    Logging.AddSerilog(Configuration)
     ...
 }
 ```

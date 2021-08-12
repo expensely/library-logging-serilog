@@ -1,12 +1,11 @@
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Exceptions;
 
-namespace Expensely.Logging.Serilog.Extensions
+namespace Expensely.Logging.Serilog
 {
-    public static class ServiceCollectionExtensions
+    public static class Logging
     {
         /// <summary>
         /// 
