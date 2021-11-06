@@ -2,8 +2,9 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Exceptions;
+using Serilog.Formatting.Json;
 
-namespace Expensely.Logging.Serilog
+namespace Expensely.Logging.Serilog.Extensions
 {
     public static class Logging
     {
@@ -13,15 +14,12 @@ namespace Expensely.Logging.Serilog
         /// <param name="configuration">Configuration properties</param>
         /// <param name="environmentVariableName">Name of the environment variable that contains the environment name</param>
         /// <param name="firstMessage">First message to print out</param>
-        /// <returns></returns>
         public static void AddSerilog(
             IConfiguration configuration,
             string environmentVariableName = "DOTNET_ENVIRONMENT",
             string firstMessage = "Logging registered")
         {
-            
             Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(configuration)
                 .Enrich.WithAssemblyName()
                 .Enrich.WithAssemblyVersion()
                 .Enrich.WithMachineName()
@@ -33,6 +31,7 @@ namespace Expensely.Logging.Serilog
                 .Enrich.WithThreadId()
                 .Enrich.WithThreadName()
                 .Enrich.WithExceptionDetails()
+                .WriteTo.Console(new JsonFormatter(renderMessage: true))
                 .CreateLogger();
 
             Log.Information(firstMessage);
