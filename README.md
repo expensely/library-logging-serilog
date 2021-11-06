@@ -18,26 +18,12 @@ Add Configuration
 ``` json
 {
   "Serilog": {
-    "Using":  [
-      "Serilog.Sinks.Console"
-    ],
-    "MinimumLevel": {
-      "Default": "Debug",
-      "Override": {
-        "Microsoft": "Debug",
-        "System": "Debug"
-      }
-    },
-    "WriteTo": [
-      {
-        "Name": "Console",
-        "Args": {
-          "formatter": "Serilog.Formatting.Compact.RenderedCompactJsonFormatter, Serilog.Formatting.Compact"
-        }
-      }
-    ],
-    "Properties": {
-      "Application": "Time"
+    "MinimumLevel": "Warning",
+    "Override": {
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Warning",
+      "Microsoft.EntityFrameworkCore": "Debug"
     }
   }
 }
