@@ -17,6 +17,7 @@ stages:
           - template: templates/push.yml
 
   - stage: release
+    dependsOn: build
     displayName: Release
     jobs:
       - deployment:
