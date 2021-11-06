@@ -1,12 +1,10 @@
-name: 0.0$(Rev:.r)
+pr: none
+
+trigger:
+  - main
 
 pool:
   vmImage: 'ubuntu-latest'
-
-variables:
-  - name: isRelease
-    value: ${{ eq(variables['Build.SourceBranch'], 'refs/heads/main') }}
-    readonly: true
 
 stages:
   - stage: build
@@ -20,7 +18,6 @@ stages:
 
   - stage: release
     displayName: Release
-    dependsOn: prerelease
     jobs:
       - deployment:
         environment: Release
