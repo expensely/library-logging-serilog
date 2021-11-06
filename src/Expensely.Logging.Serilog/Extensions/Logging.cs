@@ -20,6 +20,7 @@ namespace Expensely.Logging.Serilog.Extensions
             string firstMessage = "Logging registered")
         {
             Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration)
                 .Enrich.WithAssemblyName()
                 .Enrich.WithAssemblyVersion()
                 .Enrich.WithMachineName()
