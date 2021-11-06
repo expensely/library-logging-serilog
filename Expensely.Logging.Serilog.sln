@@ -12,6 +12,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{F9B62969-1AA2-48C7-8C8A-5776DAD1561C}"
 ProjectSection(SolutionItems) = preProject
 	pipelines\release.yml = pipelines\release.yml
+	pipelines\preview.yml = pipelines\preview.yml
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{35DF2805-2A3A-40A3-9EE5-162C3516E098}"
+ProjectSection(SolutionItems) = preProject
+	pipelines\templates\build.yml = pipelines\templates\build.yml
+	pipelines\templates\promote.yml = pipelines\templates\promote.yml
+	pipelines\templates\push.yml = pipelines\templates\push.yml
 EndProjectSection
 EndProject
 Global
@@ -27,5 +35,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BF383A20-7261-4D7F-92EF-C43D0E313787} = {A5AE21A5-04AB-4D2F-BBBC-A0DD7778C1D7}
+		{35DF2805-2A3A-40A3-9EE5-162C3516E098} = {F9B62969-1AA2-48C7-8C8A-5776DAD1561C}
 	EndGlobalSection
 EndGlobal

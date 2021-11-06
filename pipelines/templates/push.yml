@@ -1,0 +1,9 @@
+steps:
+  - task: DotNetCoreCLI@2
+    displayName: Push
+    inputs:
+      command: 'push'
+      packagesToPush: 'src/Expensely.Logging.Serilog/bin/Release/Expensely.Logging.Serilog.$(Build.BuildNumber).nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '4634f7ff-ee1a-49bd-b3de-2f19eb18d3e1'
+      allowPackageConflicts: true
