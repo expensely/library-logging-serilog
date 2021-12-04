@@ -1,3 +1,4 @@
+using Expensely.Logging.Serilog.Enrichers;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Configuration;
@@ -32,6 +33,8 @@ namespace Expensely.Logging.Serilog.Extensions
                 .Enrich.WithThreadId()
                 .Enrich.WithThreadName()
                 .Enrich.WithExceptionDetails()
+                .Enrich.WithRequestUserId()
+                .Enrich.With<RoutePattern>()
                 .WriteTo.Console(new JsonFormatter(renderMessage: true))
                 .CreateLogger();
 
