@@ -35,6 +35,7 @@ Add Serilog with configuration
 public void ConfigureServices(IServiceCollection services)
 {
     ...
+    services.AddHttpContextAccessor();
     Logging.AddSerilog(Configuration)
     ...
 }
