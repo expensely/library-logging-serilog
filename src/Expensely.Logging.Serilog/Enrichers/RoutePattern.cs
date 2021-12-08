@@ -31,7 +31,12 @@ namespace Expensely.Logging.Serilog.Enrichers
           pattern = pattern.Replace("{version:apiVersion}", version.ToString());
         }
       }
-      
+
+      if (!pattern.StartsWith("/"))
+      {
+        pattern = "/" + pattern;
+      }
+
       var property = new LogEventProperty("RoutePattern", new ScalarValue(pattern));
       logEvent.AddOrUpdateProperty(property);
     }
