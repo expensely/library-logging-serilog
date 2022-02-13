@@ -2,6 +2,7 @@ using Expensely.Logging.Serilog.Enrichers;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Configuration;
+using Serilog.Enrichers.Span;
 using Serilog.Exceptions;
 using Serilog.Formatting.Json;
 
@@ -35,6 +36,7 @@ namespace Expensely.Logging.Serilog.Extensions
                 .Enrich.WithExceptionDetails()
                 .Enrich.WithRequestUserId()
                 .Enrich.With<RoutePattern>()
+                .Enrich.WithSpan()
                 .WriteTo.Console(new JsonFormatter(renderMessage: true))
                 .CreateLogger();
 
