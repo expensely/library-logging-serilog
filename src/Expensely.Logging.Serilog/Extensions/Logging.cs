@@ -36,6 +36,7 @@ namespace Expensely.Logging.Serilog.Extensions
                 .Enrich.WithExceptionDetails()
                 .Enrich.WithRequestUserId()
                 .Enrich.With<RoutePattern>()
+                .Enrich.With<OTel>()
                 .Enrich.WithSpan()
                 .WriteTo.Console(new JsonFormatter(renderMessage: true))
                 .CreateLogger();
