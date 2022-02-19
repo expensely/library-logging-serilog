@@ -9,7 +9,7 @@ using Serilog.Formatting.Json;
 
 namespace Expensely.Logging.Serilog.Extensions
 {
-    public static class Logging
+    public static class ServiceCollection
     {
         /// <summary>
         /// 
@@ -18,7 +18,7 @@ namespace Expensely.Logging.Serilog.Extensions
         /// <param name="configuration">Configuration properties</param>
         /// <param name="environmentVariableName">Name of the environment variable that contains the environment name</param>
         /// <param name="firstMessage">First message to print out</param>
-        public static void AddSerilog(
+        public static IServiceCollection AddSerilog(
             this IServiceCollection services,
             IConfiguration configuration,
             string environmentVariableName = "DOTNET_ENVIRONMENT",
@@ -47,6 +47,8 @@ namespace Expensely.Logging.Serilog.Extensions
             Log.Information(firstMessage);
             
             services.AddSingleton(Log.Logger);
+
+            return services;
         }
     }
 }
