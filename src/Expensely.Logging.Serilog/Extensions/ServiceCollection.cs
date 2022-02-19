@@ -24,6 +24,8 @@ namespace Expensely.Logging.Serilog.Extensions
             string environmentVariableName = "DOTNET_ENVIRONMENT",
             string firstMessage = "Logging registered")
         {
+            services.AddHttpContextAccessor();
+            
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .Enrich.WithAssemblyName()
