@@ -29,14 +29,12 @@ Add Configuration
 }
 ```
 
-
 Add Serilog with configuration
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
     ...
-    services.AddHttpContextAccessor();
-    Logging.AddSerilog(Configuration)
+    services.AddSerilog(Configuration)
     ...
 }
 ```
