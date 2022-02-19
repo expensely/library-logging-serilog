@@ -34,7 +34,7 @@ Add Serilog with configuration
 public void ConfigureServices(IServiceCollection services)
 {
     ...
-    services.AddSerilog(Configuration)
+    services.AddSerilog(Configuration);
     ...
 }
 ```
