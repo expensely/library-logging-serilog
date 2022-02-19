@@ -1,5 +1,6 @@
 using Expensely.Logging.Serilog.Enrichers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Enrichers.Span;
@@ -13,10 +14,12 @@ namespace Expensely.Logging.Serilog.Extensions
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="services">Service collection</param>
         /// <param name="configuration">Configuration properties</param>
         /// <param name="environmentVariableName">Name of the environment variable that contains the environment name</param>
         /// <param name="firstMessage">First message to print out</param>
         public static void AddSerilog(
+            this IServiceCollection services,
             IConfiguration configuration,
             string environmentVariableName = "DOTNET_ENVIRONMENT",
             string firstMessage = "Logging registered")
@@ -42,6 +45,8 @@ namespace Expensely.Logging.Serilog.Extensions
                 .CreateLogger();
 
             Log.Information(firstMessage);
+            
+            services.AddSingleton(Log.Logger);
         }
     }
 }

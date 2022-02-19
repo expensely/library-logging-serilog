@@ -1,5 +1,5 @@
 steps:
-  - script: echo "##vso[build.updatebuildnumber]1.0.$(build.buildid).$(System.StageAttempt)"
+  - script: echo "##vso[build.updatebuildnumber]2.0.$(build.buildid).$(System.StageAttempt)"
     displayName: Set build identifier
   - task: DotNetCoreCLI@2
     displayName: Restore
