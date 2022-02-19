@@ -19,7 +19,7 @@
         <PackageVersion>0.0.1</PackageVersion>
         <Version>0.0.1</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
