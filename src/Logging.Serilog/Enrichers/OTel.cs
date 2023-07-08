@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Serilog.Core;
 using Serilog.Events;
 
-
-namespace Expensely.Logging.Serilog.Enrichers
+namespace Logging.Serilog.Enrichers
 {
     public class OTel : ILogEventEnricher
     {

@@ -1,6 +1,4 @@
-# Expensely.Logging.Serilog
-
-[![Build Status](https://dev.azure.com/expensely-au/Expensely/_apis/build/status/Libraries/Logging%20serilog?branchName=main)](https://dev.azure.com/expensely-au/Expensely/_build/latest?definitionId=37&branchName=main)
+# Logging.Serilog
 
 | View       | Badge                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 |:-----------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -50,5 +48,5 @@ dotnet build --configuration release
 dotnet pack --configuration release 
 
 // Step 3: Publish
-dotnet nuget push "Expensely.Logging.Serilog.*.nupkg" -Source "github"
+dotnet nuget push "Logging.Serilog.*.nupkg" -Source "github"
 ```

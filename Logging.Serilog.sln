@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Expensely.Logging.Serilog", "src\Expensely.Logging.Serilog\Expensely.Logging.Serilog.csproj", "{BF383A20-7261-4D7F-92EF-C43D0E313787}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.Serilog", "src\Logging.Serilog\Logging.Serilog.csproj", "{BF383A20-7261-4D7F-92EF-C43D0E313787}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5AE21A5-04AB-4D2F-BBBC-A0DD7778C1D7}"
 EndProject

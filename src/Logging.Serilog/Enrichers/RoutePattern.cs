@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Routing;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Expensely.Logging.Serilog.Enrichers
+namespace Logging.Serilog.Enrichers
 {
   public class RoutePattern : ILogEventEnricher
   {
@@ -22,17 +22,17 @@ namespace Expensely.Logging.Serilog.Enrichers
       
       var routeData = _contextAccessor.HttpContext.GetRouteData();
       var routeEndpoint = _contextAccessor.HttpContext.GetEndpoint() as RouteEndpoint;
-      var pattern = routeEndpoint.RoutePattern.RawText;
+      var pattern = routeEndpoint?.RoutePattern.RawText;
             
       if(routeData.Values.TryGetValue("version", out var version))
       {
-        if (pattern.Contains("{version:apiVersion}"))
+        if (pattern?.Contains("{version:apiVersion}") == true)
         {
           pattern = pattern.Replace("{version:apiVersion}", version.ToString());
         }
       }
 
-      if (!pattern.StartsWith("/"))
+      if (pattern?.StartsWith("/") == true)
       {
         pattern = "/" + pattern;
       }

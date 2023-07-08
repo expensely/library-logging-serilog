@@ -1,4 +1,4 @@
-using Expensely.Logging.Serilog.Enrichers;
+using Logging.Serilog.Enrichers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -7,7 +7,7 @@ using Serilog.Enrichers.Span;
 using Serilog.Exceptions;
 using Serilog.Formatting.Json;
 
-namespace Expensely.Logging.Serilog.Extensions
+namespace Logging.Serilog.Extensions
 {
     public static class ServiceCollection
     {
