@@ -28,26 +28,15 @@ namespace Logging.Serilog.Extensions
             
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
-                //.Enrich.WithAssemblyName()
-                //.Enrich.WithAssemblyVersion()
-                //.Enrich.WithMachineName()
-                .Enrich.WithProperty("Environment", configuration.GetValue<string>(environmentVariableName))
-                .Enrich.FromLogContext()
+                //.Enrich.WithAssemblyName().Enrich.WithAssemblyVersion().Enrich.WithMachineName()
+                .Enrich.WithProperty("Environment", configuration.GetValue<string>(environmentVariableName)).Enrich.FromLogContext()
                 //.Enrich.WithMessageTemplate()
                 .Enrich.WithProcessId()
-                //.Enrich.WithProcessName()
-                //.Enrich.WithThreadId()
-                //.Enrich.WithThreadName()
-                .Enrich.WithExceptionDetails()
-                //.Enrich.WithRequestUserId()
-                .Enrich.With<RoutePattern>()
-                .Enrich.With<OTel>()
-                .Enrich.WithSpan()
-                .WriteTo.Console(new JsonFormatter(renderMessage: true))
-                .CreateLogger();
+                //.Enrich.WithProcessName().Enrich.WithThreadId().Enrich.WithThreadName()
+                .Enrich.WithExceptionDetails()//.Enrich.WithRequestUserId()
+                .Enrich.With<RoutePattern>().Enrich.With<OTel>().Enrich.WithSpan().WriteTo.Console(new JsonFormatter(renderMessage: true)).CreateLogger();
 
             Log.Information(firstMessage);
-            
             services.AddSingleton(Log.Logger);
 
             return services;
