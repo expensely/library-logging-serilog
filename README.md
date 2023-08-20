@@ -50,3 +50,5 @@ dotnet pack --configuration release
 // Step 3: Publish
 dotnet nuget push "Logging.Serilog.*.nupkg" -Source "github"
 ```
+
+
