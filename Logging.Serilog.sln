@@ -22,6 +22,12 @@ ProjectSection(SolutionItems) = preProject
 	pipelines\templates\push.yml = pipelines\templates\push.yml
 EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{FE5ACDB6-30F5-4910-B09B-64EC68E3B02E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.Serilog.Sample.WorkerService", "samples\Logging.Serilog.Sample.WorkerService\Logging.Serilog.Sample.WorkerService.csproj", "{8C7DA60F-3BA8-4930-8F8E-B7686A3B7069}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.Serilog.Sample.WebAPI", "samples\Logging.Serilog.Sample.WebAPI\Logging.Serilog.Sample.WebAPI.csproj", "{BFB64401-A45C-4EE9-9912-D6C7CCDE1FC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,9 +38,19 @@ Global
 		{BF383A20-7261-4D7F-92EF-C43D0E313787}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF383A20-7261-4D7F-92EF-C43D0E313787}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF383A20-7261-4D7F-92EF-C43D0E313787}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C7DA60F-3BA8-4930-8F8E-B7686A3B7069}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C7DA60F-3BA8-4930-8F8E-B7686A3B7069}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C7DA60F-3BA8-4930-8F8E-B7686A3B7069}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C7DA60F-3BA8-4930-8F8E-B7686A3B7069}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFB64401-A45C-4EE9-9912-D6C7CCDE1FC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFB64401-A45C-4EE9-9912-D6C7CCDE1FC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFB64401-A45C-4EE9-9912-D6C7CCDE1FC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFB64401-A45C-4EE9-9912-D6C7CCDE1FC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BF383A20-7261-4D7F-92EF-C43D0E313787} = {A5AE21A5-04AB-4D2F-BBBC-A0DD7778C1D7}
 		{35DF2805-2A3A-40A3-9EE5-162C3516E098} = {F9B62969-1AA2-48C7-8C8A-5776DAD1561C}
+		{8C7DA60F-3BA8-4930-8F8E-B7686A3B7069} = {FE5ACDB6-30F5-4910-B09B-64EC68E3B02E}
+		{BFB64401-A45C-4EE9-9912-D6C7CCDE1FC8} = {FE5ACDB6-30F5-4910-B09B-64EC68E3B02E}
 	EndGlobalSection
 EndGlobal
