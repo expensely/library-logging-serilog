@@ -4,7 +4,7 @@ run-name: ADD VERSION NUMBER Build and Release
 on:
   pull_request:
     branches:
-      - master
+      - main
 
 concurrency:
   cancel-in-progress: false
