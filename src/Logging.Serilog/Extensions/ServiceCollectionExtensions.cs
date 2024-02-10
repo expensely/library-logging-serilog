@@ -34,7 +34,7 @@ public static class ServiceCollectionExtensions
             .Enrich.FromLogContext()
             .Enrich.WithAssemblyName()
             .Enrich.WithAssemblyVersion()
-            .Enrich.WithEnvironmentVariable("Environment", environmentVariableName)
+            .Enrich.WithEnvironmentVariable(environmentVariableName, "Environment")
             .Enrich.WithExceptionDetails()
             .Enrich.WithMachineName()
             .Enrich.With<MessageTemplate>()
