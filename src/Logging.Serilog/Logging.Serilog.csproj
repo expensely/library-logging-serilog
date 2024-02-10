@@ -18,7 +18,7 @@
         <Version>0.0.1</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageReleaseNotes>test</PackageReleaseNotes>
-        <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+        <TargetFrameworks>net6.0;net7.0;net8.0;net6.0-windows;net7.0-windows</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
