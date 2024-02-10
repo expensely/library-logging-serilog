@@ -1,0 +1,27 @@
+﻿name: Build and Release
+run-name: ADD VERSION NUMBER Build and Release
+
+on:
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  cancel-in-progress: false
+  group: library-logging-serilog-build-and-release
+
+defaults:
+  run:
+    shell: powershell
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dotnet/nbgv@master
+        with:
+          setAllVars: true
+      - run: echo 'SemVer2=${{ steps.nbgv.outputs.SemVer2 }}'
