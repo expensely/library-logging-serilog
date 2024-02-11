@@ -21,8 +21,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: dotnet/nbgv@master
-        with:
-          setAllVars: true
       - run: echo "$NBGV_CloudBuildNumber"
         name: NBGV_CloudBuildNumber
       - run: echo "$NBGV_VersionFileFound"
