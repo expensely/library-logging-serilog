@@ -1,36 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <LangVersion>latestmajor</LangVersion>
         <Company>gavanlamb</Company>
         <Author>Gavan Lamb</Author>
         <Authors>Gavan Lamb</Authors>
-        <Description>Setup and add Serilog</Description>
+        <Description>Setup and add Serilog logging</Description>
         <PackageId>Logging.Serilog</PackageId>
         <RootNamespace>Logging.Serilog</RootNamespace>
         <PackageProjectUrl>https://github.com/gavanlamb/library-logging-serilog</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/gavanlamb/library-logging-serilog/blob/main/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/gavanlamb/library-logging-serilog</RepositoryUrl>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-
         <AssemblyVersion>0.0.1</AssemblyVersion>
         <FileVersion>0.0.1</FileVersion>
         <PackageVersion>0.0.1</PackageVersion>
         <Version>0.0.1</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <TargetFramework>net6.0</TargetFramework>
         <PackageReleaseNotes>test</PackageReleaseNotes>
+        <TargetFrameworks>net6.0;net7.0;net8.0;net6.0-windows;net7.0-windows</TargetFrameworks>
     </PropertyGroup>
-
     <ItemGroup>
-        <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
-        <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.0" />
-        <PackageReference Include="Serilog.Enrichers.Span" Version="2.2.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+        <PackageReference Include="Serilog.Enrichers.AssemblyName" Version="1.0.9" />
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
+        <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.2" />
+        <PackageReference Include="Serilog.Enrichers.RequestUserId" Version="1.0.0" />
+        <PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
+        <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
         <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
-        <PackageReference Include="Serilog.Extensions.Hosting" Version="7.0.0" />
-        <PackageReference Include="Serilog.Settings.Configuration" Version="7.0.0" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+        <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
     </ItemGroup>
-
 </Project>

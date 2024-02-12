@@ -27,15 +27,36 @@ Add Configuration
 }
 ```
 
-Add Serilog with configuration
+Add Serilog to `WebApplicationBuilder`
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
     ...
-    services.AddSerilog(Configuration);
+    builder.AddSerilog();
     ...
 }
 ```
+
+Add Serilog to `IHostBuilder`
+``` csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    IHost host = Host.CreateDefaultBuilder(args)
+        .ConfigureServices(services => { services.AddHostedService<Worker>(); })
+        .AddSerilog()
+        .Build();
+    ...
+}
+```
+## TODO 
+* Add unit tests
+  * Add code coverage
+  * Add test reporting
+  * Run stryker
+  * Run code coverage
+* Add a list of all enrichers and configuration to read and method documentation
+* Add release notes from a source [ticket|release|notes|variable|issue]
+* Add Logo
 
 ## Development
 ### Build, Package & Release

@@ -1,0 +1,75 @@
+﻿name: Build and Release
+run-name: ADD VERSION NUMBER Build and Release
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  cancel-in-progress: false
+  group: library-logging-serilog-build-and-release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dotnet/nbgv@master
+      - run: echo "$NBGV_CloudBuildNumber"
+        name: NBGV_CloudBuildNumber
+      - run: echo "$NBGV_VersionFileFound"
+        name: NBGV_VersionFileFound
+      - run: echo "$NBGV_AssemblyVersion"
+        name: NBGV_AssemblyVersion
+      - run: echo "$NBGV_AssemblyFileVersion"
+        name: NBGV_AssemblyFileVersion
+      - run: echo "$NBGV_AssemblyInformationalVersion"
+        name: NBGV_AssemblyInformationalVersion
+      - run: echo "$NBGV_PublicRelease"
+        name: NBGV_PublicRelease
+      - run: echo "$NBGV_PrereleaseVersion"
+        name: NBGV_PrereleaseVersion
+      - run: echo "$NBGV_PrereleaseVersionNoLeadingHyphen"
+        name: NBGV_PrereleaseVersionNoLeadingHyphen
+      - run: echo "$NBGV_SimpleVersion"
+        name: NBGV_SimpleVersion
+      - run: echo "$NBGV_BuildNumber"
+        name: NBGV_BuildNumber
+      - run: echo "$NBGV_VersionRevision"
+        name: NBGV_VersionRevision
+      - run: echo "$NBGV_MajorMinorVersion"
+        name: NBGV_MajorMinorVersion
+      - run: echo "$NBGV_VersionMajor"
+        name: NBGV_VersionMajor
+      - run: echo "$NBGV_VersionMinor"
+        name: NBGV_VersionMinor
+      - run: echo "$NBGV_GitCommitId"
+        name: NBGV_CloudBuildNumber
+      - run: echo "$NBGV_GitCommitIdShort"
+        name: NBGV_GitCommitId
+      - run: echo "$NBGV_GitCommitDate"
+        name: NBGV_GitCommitDate
+      - run: echo "$NBGV_VersionHeight"
+        name: NBGV_VersionHeight
+      - run: echo "$NBGV_VersionHeightOffset"
+        name: NBGV_VersionHeightOffset
+      - run: echo "$NBGV_Version"
+        name: NBGV_Version
+      - run: echo "$NBGV_BuildMetadataFragment"
+        name: NBGV_BuildMetadataFragment
+      - run: echo "$NBGV_NuGetPackageVersion"
+        name: NBGV_NuGetPackageVersion
+      - run: echo "$NBGV_ChocolateyPackageVersion"
+        name: NBGV_ChocolateyPackageVersion
+      - run: echo "$NBGV_NpmPackageVersion"
+        name: NBGV_NpmPackageVersion
+      - run: echo "$NBGV_SemVer1"
+        name: NBGV_SemVer1
+      - run: echo "$NBGV_SemVer2"
+        name: NBGV_SemVer2

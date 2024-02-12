@@ -1,8 +1,9 @@
-# AB#{{TICKET NUMBER}} - {{TICKET TITLE}}
+# {{TICKET NUMBER}} - {{TICKET TITLE}}
 ## Description
 *
 *
 *
 
-## Testing
-- [ ] Unit tests
+## Tasks
+[ ] Sample project has been updated
+[ ] Documentation has been updated/added

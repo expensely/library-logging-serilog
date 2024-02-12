@@ -1,0 +1,11 @@
+﻿{
+  "profiles": {
+    "Logging.Serilog.Sample.WorkerService": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
