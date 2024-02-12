@@ -6,7 +6,7 @@
         <Company>gavanlamb</Company>
         <Author>Gavan Lamb</Author>
         <Authors>Gavan Lamb</Authors>
-        <Description>Setup and add Serilog</Description>
+        <Description>Setup and add Serilog logging</Description>
         <PackageId>Logging.Serilog</PackageId>
         <RootNamespace>Logging.Serilog</RootNamespace>
         <PackageProjectUrl>https://github.com/gavanlamb/library-logging-serilog</PackageProjectUrl>
