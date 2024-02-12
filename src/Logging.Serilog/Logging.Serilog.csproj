@@ -19,8 +19,8 @@
         <PackageVersion>0.0.1</PackageVersion>
         <Version>0.0.1</Version>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <TargetFramework>net6.0</TargetFramework>
         <PackageReleaseNotes>test</PackageReleaseNotes>
+        <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
