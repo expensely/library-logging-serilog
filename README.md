@@ -27,12 +27,24 @@ Add Configuration
 }
 ```
 
-Add Serilog with configuration
+Add Serilog to `IHostBuilder`
+``` csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    IHost host = Host.CreateDefaultBuilder(args)
+        .ConfigureServices(services => { services.AddHostedService<Worker>(); })
+        .AddSerilog()
+        .Build();
+    ...
+}
+```
+
+Add Serilog to `WebApplicationBuilder`
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
     ...
-    services.AddSerilog(Configuration);
+    builder.AddSerilog();
     ...
 }
 ```
