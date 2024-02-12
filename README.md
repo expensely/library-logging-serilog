@@ -48,6 +48,15 @@ public void ConfigureServices(IServiceCollection services)
     ...
 }
 ```
+## TODO 
+* Add unit tests
+  * Add code coverage
+  * Add test reporting
+  * Run stryker
+  * Run code coverage
+* Add a list of all enrichers and configuration to read and method documentation
+* Add release notes from a source [ticket|release|notes|variable|issue]
+* Add Logo
 
 ## Development
 ### Build, Package & Release
