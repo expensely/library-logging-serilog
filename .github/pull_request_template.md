@@ -1,4 +1,5 @@
-# AB#{{TICKET NUMBER}} - {{TICKET TITLE}}
+# {{TICKET-NUMBER}} - {{TICKET-TITLE}}
+
 ## Description
 *
 *
@@ -6,3 +7,4 @@
 
 ## Testing
 - [ ] Unit tests
+- [ ] Updated readme
