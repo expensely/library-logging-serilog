@@ -24,6 +24,8 @@ EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.Serilog.Sample.WebAPI", "samples\Logging.Serilog.Sample.WebAPI\Logging.Serilog.Sample.WebAPI.csproj", "{29ED41AC-3100-4EC3-BA77-DA514EF20CA9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.Serilog.Sample.WorkerService", "samples\Logging.Serilog.Sample.WorkerService\Logging.Serilog.Sample.WorkerService.csproj", "{45CE0E55-7D73-4086-AB78-A4B48184A047}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{29ED41AC-3100-4EC3-BA77-DA514EF20CA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29ED41AC-3100-4EC3-BA77-DA514EF20CA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29ED41AC-3100-4EC3-BA77-DA514EF20CA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45CE0E55-7D73-4086-AB78-A4B48184A047}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45CE0E55-7D73-4086-AB78-A4B48184A047}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45CE0E55-7D73-4086-AB78-A4B48184A047}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45CE0E55-7D73-4086-AB78-A4B48184A047}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BF383A20-7261-4D7F-92EF-C43D0E313787} = {A5AE21A5-04AB-4D2F-BBBC-A0DD7778C1D7}
