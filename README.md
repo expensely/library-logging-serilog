@@ -41,12 +41,8 @@ public void ConfigureServices(IServiceCollection services)
 
 Add Serilog to `WebApplicationBuilder`
 ``` csharp
-public void ConfigureServices(IServiceCollection services)
-{
-    ...
-    builder.AddSerilog();
-    ...
-}
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+builder.AddSerilog();
 ```
 
 ## Development
