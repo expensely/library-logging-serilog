@@ -1,0 +1,215 @@
+﻿name: Build and Release
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+# TODO 
+## In the paths use PR instead of branch name unless it's master/main
+
+jobs:
+  build-solution:
+    name: Build Solution
+    runs-on: ubuntu-latest
+    concurrency:
+      cancel-in-progress: true
+      group: ${{ github.head_ref }}-build-solution
+    outputs: 
+      AssemblyVersion: ${{ steps.version.outputs.AssemblyVersion }}
+      AssemblyFileVersion: ${{ steps.version.outputs.AssemblyFileVersion }}
+      NuGetPackageVersion: ${{ steps.version.outputs.NuGetPackageVersion }}
+      Version: ${{ steps.version.outputs.Version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # ref: TODO use PR BRANCH
+
+      # Generate version number
+      - uses: dotnet/nbgv@master
+        name: Generate version number
+        id: version
+
+      # Lint
+      - name: Lint
+        if: github.event_name == 'pull_request'
+        uses: zyactions/dotnet-lint@v1
+        with:
+          workspace: Logging.Serilog.sln
+          implicit-restore: true
+
+      # Restore packages
+      - name: Restore
+        run: dotnet restore --no-cache src/Logging.Serilog/Logging.Serilog.csproj
+      - name: Install dotnet outdated
+        run: dotnet tool update dotnet-outdated-tool -g
+      - name: Check outdated packages
+        run: |
+          mkdir -p artifacts/outdated
+          dotnet outdated --output-format Markdown --output artifacts/outdated/comment.md
+      - name: Check file existence
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: artifacts/outdated/comment.md
+      - name: Add dotnet job summary
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: |
+          value=$(<artifacts/outdated/comment.md)
+          echo "$value" >> $GITHUB_STEP_SUMMARY
+      - uses: mshick/add-pr-comment@v2
+        name: Add dotnet outdated comment to PR
+        if: github.event_name == 'pull_request' && steps.check_files.outputs.files_exists == 'true'
+        with:
+          message-path: artifacts/outdated/comment.md
+          message-id: ${{ github.head_ref }}
+
+      # Build
+      - name: Build
+        run: dotnet build --no-restore --configuration Release /p:AssemblyVersion=${{ steps.version.outputs.AssemblyVersion }} /p:FileVersion=${{ steps.version.outputs.AssemblyFileVersion }} /p:PackageVersion=${{ steps.version.outputs.NuGetPackageVersion }} /p:Version=${{ steps.version.outputs.Version }}
+
+      # Run Unit tests
+      - name: Test
+        run: dotnet test --collect:"XPlat Code Coverage" --no-build --configuration Release --results-directory ./tests/results/Logging.Serilog/ tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj --settings tests/default.runsettings
+
+      # Publish Test Results
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: |
+            ./tests/results/Logging.Serilog/*.trx
+
+      # Generate Coverage Report
+      - name: Download Coverage History
+        uses: joutvhu/download-s3@v1
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ap-southeast-2
+          aws_bucket: gavanlamb-github-actions-assets
+          source: ${{ github.repository }}/main/history
+          target: coverage/history
+
+      - name: Generate Coverage Report
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.2
+        with:
+          reports: ./tests/results/Logging.Serilog/**/coverage.cobertura.xml
+          targetdir: coverage/reports
+          historydir: coverage/history
+          reporttypes: Html;MarkdownSummaryGithub;Badges
+          sourcedirs: ./
+          assemblyfilters: '+*' # Optional list of assemblies that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
+          classfilters: '+*' # Optional list of classes that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
+          filefilters: '+*' # Optional list of files that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
+          verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+          title: ${{ steps.version.outputs.NuGetPackageVersion }}
+          tag: ${{ steps.version.outputs.NuGetPackageVersion }}
+          license: ${{ secrets.REPORT_GENERATOR_LICENSE }}
+          customSettings: settings:maximumNumberOfHistoricCoverageFiles=100;settings:createSubdirectoryForAllReportTypes=true
+          #plugins: '' # Optional plugin files for custom reports or custom history storage (separated by semicolon).
+          # TODO add plugin for uploading to S3
+
+      - name: Push Coverage Assets
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_bucket: gavanlamb-github-actions-assets
+          source_dir: coverage/reports
+          destination_dir: ${{ github.repository }}/${{ github.head_ref }}/coverage
+
+      - name: Push Coverage Report History
+        uses: shallwefootball/s3-upload-action@master
+        if: ${{ github.base_ref == 'main' }}
+        with:
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_bucket: gavanlamb-github-actions-assets
+          source_dir: coverage/history
+          destination_dir: ${{ github.repository }}/${{ github.head_ref }}/coverage/history
+        
+      # Mutation test
+      - name: Install Stryker
+        run: dotnet tool install dotnet-stryker -g 
+      - name: Run Stryker
+        run: dotnet stryker --output mutation --config-file stryker-config.json --version "${{ github.head_ref }}" --dashboard-api-key "${{ secrets.STRYKER_API_KEY }}"
+      - name: Push Mutation Report
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_bucket: gavanlamb-github-actions-assets
+          source_dir: mutation/reports
+          destination_dir: ${{ github.repository }}/${{ github.head_ref }}/mutation
+      
+      # Pack
+      - name: Pack
+        run: dotnet pack --no-build --configuration Release src/Logging.Serilog/Logging.Serilog.csproj --output src/Logging.Serilog/bin/Release/Packed # /p:AssemblyVersion=${{ steps.version.outputs.AssemblyVersion }} /p:FileVersion=${{ steps.version.outputs.AssemblyFileVersion }} /p:PackageVersion=${{ steps.version.outputs.NuGetPackageVersion }} /p:Version=${{ steps.version.outputs.Version }}
+      - name: Archive NuGet Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: NuGet Package
+          path: src/Logging.Serilog/bin/Release/Packed
+
+  build-technical-documentation:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    concurrency:
+      cancel-in-progress: true
+      group: ${{ github.head_ref }}-build-documentation
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # ref: TODO use PR BRANCH
+      - name: Install mkdocs
+        run: |
+          pip install mkdocs
+          pip install mkdocs-material
+          pip install mkdocs-mermaid2-plugin
+          pip install mkdocs-table-reader-plugin
+      - name: Build docs
+        run: |
+          cd docs
+          mkdocs build 
+      - name: Archive docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Documentation
+          path: docs/site
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs:
+      - build-solution
+      - build-technical-documentation
+    concurrency:
+      cancel-in-progress: false
+      group: ${{ github.head_ref }}-release
+    steps:
+      - name: Download NuGet Package
+        uses: actions/download-artifact@v4
+        with:
+          name: NuGet Package
+          path: ./
+      - name: Publish to GitHub Packages
+        run: dotnet nuget push ./*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/gavanlamb/index.json --skip-duplicate
+      - name: Create badge
+        uses: alvivi/shield-badge@v1
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-2
+          aws-bucket: gavanlamb-github-actions-assets
+          aws-filepath: ${{ github.repository }}/${{ github.head_ref }}/version/version.svg
+          label: 'NuGet'
+          text: ${{ needs.build-solution.outputs.NuGetPackageVersion }}
+          label-color: '004880'
+          format: 'svg'

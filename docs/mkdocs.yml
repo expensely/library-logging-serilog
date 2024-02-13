@@ -1,0 +1,6 @@
+site_name: Technical
+theme: material
+plugins:
+  - mermaid2
+  - search
+  - table-reader
