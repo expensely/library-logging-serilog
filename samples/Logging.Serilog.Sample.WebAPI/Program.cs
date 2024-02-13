@@ -1,9 +1,9 @@
-using Logging.Serilog.Extensions;
+﻿using Logging.Serilog.Extensions;
 using Serilog;
 
 try
 {
-    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
     builder.AddSerilog();
 
     builder.Services.AddControllers();

@@ -1,4 +1,4 @@
-namespace Logging.Serilog.Sample.WebAPI;
+﻿namespace Logging.Serilog.Sample.WebAPI;
 
 public class WeatherForecast
 {
