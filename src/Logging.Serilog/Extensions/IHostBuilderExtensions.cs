@@ -40,43 +40,45 @@ public static class IHostBuilderExtensions
         string firstMessage = "Logging registered")
     {
         if (hostBuilder == null)
-            throw new ArgumentNullException($"{nameof(hostBuilder)} cannot be null", nameof(hostBuilder));
+            throw new ArgumentNullException(nameof(hostBuilder), $"{nameof(hostBuilder)} cannot be null");
 
         if (environmentVariableName == null)
-            throw new ArgumentNullException($"{nameof(environmentVariableName)} cannot be null", nameof(environmentVariableName));
+            throw new ArgumentNullException(nameof(environmentVariableName), $"{nameof(environmentVariableName)} cannot be null");
         if (string.IsNullOrWhiteSpace(environmentVariableName))
             throw new ArgumentException($"{nameof(environmentVariableName)} cannot be empty", nameof(environmentVariableName));
 
         if (firstMessage == null)
-            throw new ArgumentNullException($"{nameof(firstMessage)} cannot be null", nameof(firstMessage));
+            throw new ArgumentNullException(nameof(firstMessage), $"{nameof(firstMessage)} cannot be null");
         if (string.IsNullOrWhiteSpace(firstMessage))
             throw new ArgumentException($"{nameof(firstMessage)} cannot be empty", nameof(firstMessage));
 
         hostBuilder
-            .ConfigureLogging((hostContext, loggingBuilder) =>
-            {
-                loggingBuilder.ClearProviders();
-            
-                Log.Logger = new LoggerConfiguration()
-                    .ReadFrom.Configuration(hostContext.Configuration)
-                    .Enrich.FromLogContext()
-                    .Enrich.WithAssemblyName()
-                    .Enrich.WithAssemblyVersion()
-                    .Enrich.WithEnvironmentVariable(environmentVariableName, "Environment")
-                    .Enrich.WithExceptionDetails()
-                    .Enrich.WithMachineName()
-                    .Enrich.WithThreadId()
-                    .Enrich.WithThreadName()
-                    .Enrich.WithProcessId()
-                    .Enrich.WithProcessName()
-                    .Destructure.ToMaximumCollectionCount(maximumCollection)
-                    .Destructure.ToMaximumDepth(maximumDepth)
-                    .WriteTo.Console(new JsonFormatter(renderMessage: false))
-                    .CreateLogger();
-                Log.Information(firstMessage);
-                
-                loggingBuilder.Services.AddSingleton(Log.Logger);
-            })
+            .ConfigureLogging(
+                (hostContext, loggingBuilder) =>
+                {
+                    loggingBuilder.ClearProviders();
+
+                    Log.Logger = new LoggerConfiguration()
+                        .ReadFrom.Configuration(hostContext.Configuration)
+                        .Enrich.FromLogContext()
+                        .Enrich.WithAssemblyName()
+                        .Enrich.WithAssemblyVersion()
+                        .Enrich.WithEnvironmentVariable(environmentVariableName, "Environment")
+                        .Enrich.WithExceptionDetails()
+                        .Enrich.WithMachineName()
+                        .Enrich.WithThreadId()
+                        .Enrich.WithThreadName()
+                        .Enrich.WithProcessId()
+                        .Enrich.WithProcessName()
+                        .Destructure.ToMaximumCollectionCount(maximumCollection)
+                        .Destructure.ToMaximumDepth(maximumDepth)
+                        .WriteTo.Console(new JsonFormatter(renderMessage: false))
+                        .CreateLogger();
+                    Log.Information(firstMessage);
+
+                    loggingBuilder.Services.AddSingleton(Log.Logger);
+                }
+            )
             .UseSerilog();
 
         return hostBuilder;
