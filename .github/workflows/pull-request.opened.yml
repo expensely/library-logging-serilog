@@ -1,0 +1,47 @@
+name: 'Pull request: opened'
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+
+concurrency:
+  cancel-in-progress: false
+  group: pull-request-${{ github.ref_name }}
+
+jobs:
+  update:
+    name: Update PR description
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get issue details
+        uses: gavanlamb/github-actions/.github/actions/jira/get-issue-details@main
+        id: get-issue-details
+        with:
+          base-url: https://gavanlamb-team-1vid7fblvall.atlassian.net
+          user-email: mail@gavanlamb.com
+          api-token: ${{ secrets.JIRA_API_TOKEN }}
+      - name: Update issue details
+        uses: gavanlamb/github-actions/.github/actions/jira/change-issue-status@main
+        if: ${{ steps.get-issue-details.outputs.type == 'subtask' }}
+        with:
+          base-url: https://gavanlamb-team-1vid7fblvall.atlassian.net
+          user-email: mail@gavanlamb.com
+          api-token: ${{ secrets.JIRA_API_TOKEN }}
+          identifier: ${{ steps.get-issue-details.outputs.identifier }}
+          status: Review
+      - name: Update PR
+        uses: gavanlamb/github-actions/.github/actions/pull-request/update-pr@main
+        id: update-pr
+        with:
+          issue-identifier: ${{ steps.get-issue-details.outputs.identifier }}
+          issue-title: ${{ steps.get-issue-details.outputs.title }}
+          issue-url: ${{ steps.get-issue-details.outputs.url }}
+          environment: preview${{ github.event.pull_request.number }}
+      - name: Send message
+        uses: gavanlamb/github-actions/.github/actions/slack/pull-request-created@main
+        if: always()
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          title: ${{ steps.update-pr.outputs.title }}
