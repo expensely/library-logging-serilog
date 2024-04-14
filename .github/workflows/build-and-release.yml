@@ -11,6 +11,8 @@ on:
 # TODO 
 ## In the paths use PR instead of branch name unless it's master/main
 
+
+
 jobs:
   build-solution:
     name: Build Solution
