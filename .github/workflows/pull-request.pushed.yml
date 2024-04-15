@@ -1,0 +1,106 @@
+﻿name: 'Pull request: pushed'
+
+on:
+  pull_request:
+    branches-ignore:
+      - main
+
+env:
+  artifact-name: Website
+
+concurrency:
+  cancel-in-progress: false
+  group: pull-request-${{ github.ref_name }}
+
+jobs:
+  generate-version:
+    name: Generate Version
+    runs-on: ubuntu-latest
+    outputs:
+      sem-ver: ${{ steps.get-version.outputs.sem-ver }}
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Get version
+        uses: gavanlamb/github-actions/.github/actions/version/get@main
+        id: get-version
+        env:
+          BUILD_NUMBER: ${{ github.run_id }}
+
+  build-package:
+    name: Build Package
+    runs-on: ubuntu-latest
+    needs:
+      - generate-version
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+  build-site:
+    name: Build Site
+    runs-on: ubuntu-latest
+    needs:
+      - generate-version
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Build site
+        uses: gavanlamb/github-actions/.github/actions/hugo/build@main
+        with:
+          artifact-name: ${{ env.artifact-name }}
+          commit-by: ${{ github.actor }}
+          commit-date: ${{ steps.get-version.outputs.commit-date }}
+          commit-id: ${{ steps.get-version.outputs.sha }}
+          destination-directory: site
+          source-directory: docs
+          version: ${{ steps.get-version.outputs.sem-ver }}
+      - name: Send message
+        uses: gavanlamb/github-actions/.github/actions/slack/built@main
+        if: always()
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          version: ${{ steps.get-version.outputs.sem-ver }}
+          status: ${{ job.status }}
+          include-integration-tests: 'false'
+          include-unit-tests: 'false'
+
+  preview:
+    name: Preview
+    runs-on: ubuntu-latest
+    needs: 
+     - build-package
+     - build-site
+    env:
+      site-path: ${{ github.repository }}/release/preview${{ github.event.pull_request.number }}/site
+    environment: 
+      url: https://gavanlamb-github-actions-assets.s3.ap-southeast-2.amazonaws.com/${{ env.site-path }}/index.html
+      name: Preview${{ github.event.pull_request.number }}
+    steps:
+      - name: Deploy ${{ env.artifact-name }}
+        uses: gavanlamb/github-actions/.github/actions/hugo/deploy-to-s3@main
+        with:
+          artifact-name: ${{ env.artifact-name }}
+          artifact-directory: site
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-s3-bucket: ${{ vars.AWS_S3_CICD_BUCKET }}
+          aws-s3-path: ${{ env.site-path }}
+          aws-s3-region: ${{ vars.AWS_DEFAULT_REGION }}
+      - name: Send message
+        uses: gavanlamb/github-actions/.github/actions/slack/released@main
+        if: always()
+        with:
+          environment: Preview${{ github.event.pull_request.number }}
+          include-system-tests: 'false'
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: ${{ job.status }}
+          version: ${{ needs.build.outputs.sem-ver }}
