@@ -1,0 +1,9 @@
+baseURL = 'https://gavanlamb.com/logging.serilog'
+languageCode = 'en-us'
+title = 'Logging.Serilog Documentation'
+
+[module]
+proxy = "direct"
+
+[[module.imports]]
+path = "github.com/google/docsy"
