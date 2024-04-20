@@ -53,22 +53,36 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      - name: Build site
-        uses: gavanlamb/github-actions/.github/actions/hugo/build@main
+      - name: Install node
+        uses: actions/setup-node@v4
         with:
-          artifact-name: ${{ env.artifact-name }}
-          commit-by: ${{ github.actor }}
-          commit-date: ${{ steps.get-version.outputs.commit-date }}
-          commit-id: ${{ steps.get-version.outputs.sha }}
-          destination-directory: site
-          source-directory: docs
-          version: ${{ needs.generate-version.outputs.sem-ver }}
+          node-version: '20.x'
+      - name: Install NPM packages
+        shell: bash
+        run: |
+          npm ci
+        working-directory: docs
+      - name: Build
+        shell: bash
+        run: |
+          npm run build:production
+        working-directory: docs
+#      - name: Build site
+#        uses: gavanlamb/github-actions/.github/actions/hugo/build@main
+#        with:
+#          artifact-name: ${{ env.artifact-name }}
+#          commit-by: ${{ github.actor }}
+#          commit-date: ${{ steps.get-version.outputs.commit-date }}
+#          commit-id: ${{ steps.get-version.outputs.sha }}
+#          destination-directory: site
+#          source-directory: docs
+#          version: ${{ needs.generate-version.outputs.sem-ver }}
       - name: Send message
         uses: gavanlamb/github-actions/.github/actions/slack/built@main
         if: always()
         with:
           slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          version: ${{ steps.get-version.outputs.sem-ver }}
+          version: ${{ needs.generate-version.outputs.sem-ver }}
           status: ${{ job.status }}
           include-integration-tests: 'false'
           include-unit-tests: 'false'
