@@ -1,5 +1,6 @@
 baseURL = "https://example.docsy.dev/"
 title = "Goldydocs"
+relativeURLs = true
 
 # Language settings
 contentDir = "content/en"
