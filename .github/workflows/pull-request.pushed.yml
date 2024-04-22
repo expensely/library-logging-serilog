@@ -67,16 +67,12 @@ jobs:
         run: |
           npm run build:production
         working-directory: docs
-#      - name: Build site
-#        uses: gavanlamb/github-actions/.github/actions/hugo/build@main
-#        with:
-#          artifact-name: ${{ env.artifact-name }}
-#          commit-by: ${{ github.actor }}
-#          commit-date: ${{ steps.get-version.outputs.commit-date }}
-#          commit-id: ${{ steps.get-version.outputs.sha }}
-#          destination-directory: site
-#          source-directory: docs
-#          version: ${{ needs.generate-version.outputs.sem-ver }}
+      - name: Archive site
+        uses: gavanlamb/github-actions/.github/actions/archive@main
+        with:
+          artifact-name: ${{ env.artifact-name }}
+          source-directory: docs/public
+          destination-directory: docs
       - name: Send message
         uses: gavanlamb/github-actions/.github/actions/slack/built@main
         if: always()
