@@ -17,9 +17,12 @@ jobs:
     name: Generate Version
     runs-on: ubuntu-latest
     outputs:
+      assembly-sem-ver: ${{ steps.get-version.outputs.assembly-sem-ver }}
+      assembly-sem-file-ver: ${{ steps.get-version.outputs.assembly-sem-file-ver }}
       commit-by: ${{ steps.get-version.outputs.commit-by }}
       commit-date: ${{ steps.get-version.outputs.commit-date }}
       commit-id: ${{ steps.get-version.outputs.commit-id }}
+      nuget-version-v2: ${{ steps.get-version.outputs.nuget-version-v2 }}
       sem-ver: ${{ steps.get-version.outputs.sem-ver }}
     steps:
       - uses: actions/checkout@v4
@@ -80,11 +83,10 @@ jobs:
           workspace: Logging.Serilog.sln
           implicit-restore: false
 
-#
-#      # Build
-#      - name: Build
-#        run: dotnet build --no-restore --configuration Release /p:AssemblyVersion=${{ steps.version.outputs.AssemblyVersion }} /p:FileVersion=${{ steps.version.outputs.AssemblyFileVersion }} /p:PackageVersion=${{ steps.version.outputs.NuGetPackageVersion }} /p:Version=${{ steps.version.outputs.Version }}
-#
+      # Build
+      - name: Build
+        run: dotnet build --no-restore --configuration Release /p:AssemblyVersion=${{ needs.generate-version.outputs.assembly-sem-ver }} /p:FileVersion=${{ needs.generate-version.outputs.assembly-sem-file-ver }} /p:PackageVersion=${{ needs.generate-version.outputs.nuget-version-v2 }} /p:Version=${{ needs.generate-version.outputs.sem-ver }}
+
 #      # Run Unit tests
 #      - name: Test
 #        run: dotnet test --collect:"XPlat Code Coverage" --no-build --configuration Release --results-directory ./tests/results/Logging.Serilog/ tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj --settings tests/default.runsettings
