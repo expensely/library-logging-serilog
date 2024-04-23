@@ -9,7 +9,7 @@ namespace Logging.Serilog.Enrichers
     {
         private readonly IHttpContextAccessor _contextAccessor;
 
-        public OTel() : this((IHttpContextAccessor) new HttpContextAccessor())
+        public OTel() : this((IHttpContextAccessor)new HttpContextAccessor())
         {
         }
 
@@ -21,7 +21,7 @@ namespace Logging.Serilog.Enrichers
 
             if (activity != null)
             {
-                var epochHex = activity.TraceId.ToString().Substring(0,  8);
+                var epochHex = activity.TraceId.ToString().Substring(0, 8);
                 var randomHex = activity.TraceId.ToString().Substring(8);
                 var amazonTraceId = $"1-{epochHex}-{randomHex}";
                 logEvent.AddPropertyIfAbsent(new LogEventProperty("TraceId", new ScalarValue(amazonTraceId)));

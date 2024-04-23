@@ -56,11 +56,12 @@ public static class WebApplicationBuilderExtensions
             throw new ArgumentException($"{nameof(firstMessage)} cannot be empty", nameof(firstMessage));
 
         webApplicationBuilder.Host
-            .ConfigureLogging(logging => {
+            .ConfigureLogging(logging =>
+            {
                 logging.ClearProviders();
-                
+
                 logging.Services.AddHttpContextAccessor();
-            
+
                 Log.Logger = new LoggerConfiguration()
                     .ReadFrom.Configuration(webApplicationBuilder.Configuration)
                     .Enrich.FromLogContext()
