@@ -17,6 +17,9 @@ jobs:
     name: Generate Version
     runs-on: ubuntu-latest
     outputs:
+      commit-by: ${{ steps.get-version.outputs.commit-by }}
+      commit-date: ${{ steps.get-version.outputs.commit-date }}
+      commit-id: ${{ steps.get-version.outputs.commit-id }}
       sem-ver: ${{ steps.get-version.outputs.sem-ver }}
     steps:
       - uses: actions/checkout@v4
@@ -67,6 +70,24 @@ jobs:
         run: |
           npm run build:production
         working-directory: docs
+      - name: Generate version file
+        shell: bash
+        run: |
+          JSON_STRING=$(jq -n \
+            --arg commit-by "${{ needs.generate-version.outputs.commit-by }}" \
+            --arg commit-date "${{ needs.generate-version.outputs.commit-date }}" \
+            --arg commit-id "${{ needs.generate-version.outputs.commit-id }}" \
+            --arg version "${{ needs.generate-version.outputs.sem-ver }}" \
+            '$ARGS.named')
+
+          echo "$JSON_STRING" | jq . > "public/version.json"
+        working-directory: docs
+      - name: Create badge for site version
+        uses: emibcn/badge-action@v2.0.2
+        with:
+          label: Site version
+          status: ${{ needs.generate-version.outputs.sem-ver }}
+          path: docs/public/badges/version.svg
       - name: Archive site
         uses: gavanlamb/github-actions/.github/actions/archive@main
         with:
