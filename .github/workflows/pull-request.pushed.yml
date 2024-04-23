@@ -51,25 +51,26 @@ jobs:
       - name: Install dotnet outdated
         run: dotnet tool update dotnet-outdated-tool -g
       - name: Check outdated packages
+        id: dotnet-outdated
         run: |
           mkdir -p artifacts/outdated
-          dotnet outdated --output-format Markdown --output artifacts/outdated/comment.md
-      - name: Check file existence
-        id: check_files
-        uses: andstor/file-existence-action@v1
-        with:
-          files: artifacts/outdated/comment.md
-      - name: Add dotnet job summary
-        if: ${{ steps.check_files.outputs.files_exists == 'true' }}
-        run: |
-          value=$(<artifacts/outdated/comment.md)
-          echo "$value" >> $GITHUB_STEP_SUMMARY
+          dotnet outdated --output-format Markdown --output artifacts/outdated/outdated.md
+          FILE="artifacts/outdated/outdated.md"
+          if [ -e "$FILE" ]; then
+            OUTPUT=$(cat "$FILE")
+            echo "output<<EOF" `>> $GITHUB_OUTPUT`
+            echo "$OUTPUT" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "output=## No Outdated Packages" >> $GITHUB_OUTPUT
+          fi
       - uses: mshick/add-pr-comment@v2
         name: Add dotnet outdated comment to PR
-        if: ${{ github.event_name == 'pull_request' && steps.check_files.outputs.files_exists == 'true' }}
+        if: ${{ github.event_name == 'pull_request' }}
         with:
-          message-path: artifacts/outdated/comment.md
-          message-id: ${{ github.head_ref }}
+          message: |
+            ${{ steps.dotnet-outdated.outputs.output }}
+          message-id: dotnet-outdate-${{ github.head_ref }}
 
       # Lint
       - name: Lint
