@@ -45,39 +45,40 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      # Restore packages
+      - name: Restore
+        run: dotnet restore --no-cache src/Logging.Serilog/Logging.Serilog.csproj
+      - name: Install dotnet outdated
+        run: dotnet tool update dotnet-outdated-tool -g
+      - name: Check outdated packages
+        run: |
+          mkdir -p artifacts/outdated
+          dotnet outdated --output-format Markdown --output artifacts/outdated/comment.md
+      - name: Check file existence
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: artifacts/outdated/comment.md
+      - name: Add dotnet job summary
+        if: ${{ steps.check_files.outputs.files_exists == 'true' }}
+        run: |
+          value=$(<artifacts/outdated/comment.md)
+          echo "$value" >> $GITHUB_STEP_SUMMARY
+      - uses: mshick/add-pr-comment@v2
+        name: Add dotnet outdated comment to PR
+        if: ${{ github.event_name == 'pull_request' && steps.check_files.outputs.files_exists == 'true' }}
+        with:
+          message-path: artifacts/outdated/comment.md
+          message-id: ${{ github.head_ref }}
+
       # Lint
       - name: Lint
         if: ${{ github.event_name == 'pull_request' }}
         uses: zyactions/dotnet-lint@v1
         with:
           workspace: Logging.Serilog.sln
-          implicit-restore: true
+          implicit-restore: false
 
-#      # Restore packages
-#      - name: Restore
-#        run: dotnet restore --no-cache src/Logging.Serilog/Logging.Serilog.csproj
-#      - name: Install dotnet outdated
-#        run: dotnet tool update dotnet-outdated-tool -g
-#      - name: Check outdated packages
-#        run: |
-#          mkdir -p artifacts/outdated
-#          dotnet outdated --output-format Markdown --output artifacts/outdated/comment.md
-#      - name: Check file existence
-#        id: check_files
-#        uses: andstor/file-existence-action@v1
-#        with:
-#          files: artifacts/outdated/comment.md
-#      - name: Add dotnet job summary
-#        if: ${{ steps.check_files.outputs.files_exists == 'true' }}
-#        run: |
-#          value=$(<artifacts/outdated/comment.md)
-#          echo "$value" >> $GITHUB_STEP_SUMMARY
-#      - uses: mshick/add-pr-comment@v2
-#        name: Add dotnet outdated comment to PR
-#        if: ${{ github.event_name == 'pull_request' && steps.check_files.outputs.files_exists == 'true' }}
-#        with:
-#          message-path: artifacts/outdated/comment.md
-#          message-id: ${{ github.head_ref }}
 #
 #      # Build
 #      - name: Build
