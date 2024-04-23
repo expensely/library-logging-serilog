@@ -82,6 +82,10 @@ jobs:
 
           echo "$JSON_STRING" | jq . > "public/version.json"
         working-directory: docs
+      - name: Create directories
+        shell: bash
+        run: |
+          mkdir -p docs/public/badges
       - name: Create badge for site version
         uses: emibcn/badge-action@v2.0.2
         with:
