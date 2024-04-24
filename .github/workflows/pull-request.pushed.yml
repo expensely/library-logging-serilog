@@ -85,7 +85,14 @@ jobs:
 
       # Build
       - name: Build
-        run: dotnet build --no-restore --configuration Release /p:AssemblyVersion=${{ needs.generate-version.outputs.assembly-sem-ver }} /p:FileVersion=${{ needs.generate-version.outputs.assembly-sem-file-ver }} /p:PackageVersion=${{ needs.generate-version.outputs.nuget-version-v2 }} /p:Version=${{ needs.generate-version.outputs.sem-ver }}
+        run: | 
+          dotnet build \
+            --no-restore \
+            --configuration Release \
+            /p:AssemblyVersion=${{ needs.generate-version.outputs.assembly-sem-ver }} \
+            /p:FileVersion=${{ needs.generate-version.outputs.assembly-sem-file-ver }} \
+            /p:PackageVersion=${{ needs.generate-version.outputs.nuget-version-v2 }} \
+            /p:Version=${{ needs.generate-version.outputs.sem-ver }}
 
 #      # Run Unit tests
 #      - name: Test
@@ -162,8 +169,16 @@ jobs:
 #
       # Pack
       - name: Pack
-        run: dotnet pack --no-build --configuration Release src/Logging.Serilog/Logging.Serilog.csproj --output src/Logging.Serilog/bin/Release/Packed
-      - name: Archive Package
+        run: |
+          dotnet pack \
+            src/Logging.Serilog/Logging.Serilog.csproj \
+            --no-build \ 
+            --configuration Release \
+            --output src/Logging.Serilog/bin/Release/Packed 
+          
+#\
+#/p:PackageVersion=${{ needs.generate-version.outputs.nuget-version-v2 }}
+      - name: Archive
         uses: actions/upload-artifact@v4
         with:
           name: Package
@@ -210,13 +225,13 @@ jobs:
         shell: bash
         run: |
           mkdir -p docs/public/badges
-      - name: Create badge for site version
+      - name: Create badge for version
         uses: emibcn/badge-action@v2.0.2
         with:
           label: Site version
           status: ${{ needs.generate-version.outputs.sem-ver }}
           path: docs/public/badges/version.svg
-      - name: Archive site
+      - name: Archive
         uses: gavanlamb/github-actions/.github/actions/archive@main
         with:
           artifact-name: ${{ env.artifact-name }}
