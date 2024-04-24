@@ -34,7 +34,7 @@ jobs:
         uses: gavanlamb/github-actions/.github/actions/version/get@main
         id: get-version
         env:
-          BUILD_NUMBER: ${{ github.run_id }}
+          BUILD_NUMBER: ${{ github.run_number }}
 
   build-package:
     name: Build Package
