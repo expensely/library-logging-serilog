@@ -160,14 +160,14 @@ jobs:
 #          source_dir: mutation/reports
 #          destination_dir: ${{ github.repository }}/${{ github.head_ref }}/mutation
 #
-#      # Pack
-#      - name: Pack
-#        run: dotnet pack --no-build --configuration Release src/Logging.Serilog/Logging.Serilog.csproj --output src/Logging.Serilog/bin/Release/Packed # /p:AssemblyVersion=${{ steps.version.outputs.AssemblyVersion }} /p:FileVersion=${{ steps.version.outputs.AssemblyFileVersion }} /p:PackageVersion=${{ steps.version.outputs.NuGetPackageVersion }} /p:Version=${{ steps.version.outputs.Version }}
-#      - name: Archive NuGet Package
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: NuGet Package
-#          path: src/Logging.Serilog/bin/Release/Packed
+      # Pack
+      - name: Pack
+        run: dotnet pack --no-build --configuration Release src/Logging.Serilog/Logging.Serilog.csproj --output src/Logging.Serilog/bin/Release/Packed
+      - name: Archive Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Package
+          path: src/Logging.Serilog/bin/Release/Packed
 
   build-website:
     name: Build Website
