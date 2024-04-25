@@ -5,9 +5,6 @@ on:
     branches-ignore:
       - main
 
-env:
-  artifact-name: Website
-
 concurrency:
   cancel-in-progress: false
   group: pull-request-${{ github.ref_name }}
@@ -40,6 +37,12 @@ jobs:
   build-package:
     name: Build Package
     runs-on: ubuntu-latest
+    env:
+      artifact-name: Package
+      configuration: Release
+    outputs:
+      artifact-name: ${{ env.artifact-name }}
+      configuration: ${{ env.configuration }}
     needs:
       - generate-version
     steps:
@@ -89,7 +92,7 @@ jobs:
         run: | 
           dotnet build \
             --no-restore \
-            --configuration Release \
+            --configuration ${{ env.configuration }} \
             /p:AssemblyVersion=${{ needs.generate-version.outputs.assembly-sem-ver }} \
             /p:FileVersion=${{ needs.generate-version.outputs.assembly-sem-file-ver }} \
             /p:AssemblyInformationalVersion=${{ needs.generate-version.outputs.informational-version }} \
@@ -97,9 +100,14 @@ jobs:
 
 #      # Run Unit tests
 #      - name: Test
-#        run: dotnet test --collect:"XPlat Code Coverage" --no-build --configuration Release --results-directory ./tests/results/Logging.Serilog/ tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj --settings tests/default.runsettings
-#
-#      # Publish Test Results
+#        run: |
+#          dotnet test \
+#            --collect:"XPlat Code Coverage" \
+#            --no-build \ 
+#            --configuration ${{ env.configuration }} \
+#            --results-directory ./tests/results/Logging.Serilog/ \
+#            tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj \
+#            --settings tests/default.runsettings
 #      - name: Publish Unit Test Results
 #        uses: EnricoMi/publish-unit-test-result-action@v2
 #        with:
@@ -174,19 +182,23 @@ jobs:
           dotnet pack \
             src/Logging.Serilog/Logging.Serilog.csproj \
             --no-build \
-            --configuration Release \
-            --output src/Logging.Serilog/bin/Release/Packed \
+            --configuration ${{ env.configuration }} \
+            --output src/Logging.Serilog/bin/${{ env.configuration }}/Packed \
             /p:PackageVersion=${{ needs.generate-version.outputs.nuget-version-v2 }} \
             /p:ContinuousIntegrationBuild=true
       - name: Archive
         uses: actions/upload-artifact@v4
         with:
-          name: Package
-          path: src/Logging.Serilog/bin/Release/Packed
+          name: ${{ env.artifact-name }}
+          path: src/Logging.Serilog/bin/${{ env.configuration }}/Packed
 
   build-website:
     name: Build Website
     runs-on: ubuntu-latest
+    env:
+      artifact-name: Website
+    outputs:
+      artifact-name: ${{ env.artifact-name }}
     needs:
       - generate-version
     steps:
@@ -259,10 +271,10 @@ jobs:
       url: https://gavanlamb-github-actions-assets.s3.ap-southeast-2.amazonaws.com/${{ env.site-path }}/index.html
       name: Preview${{ github.event.pull_request.number }}
     steps:
-      - name: Deploy ${{ env.artifact-name }}
+      - name: Deploy ${{ needs.build-website.outputs.artifact-name }}
         uses: gavanlamb/github-actions/.github/actions/hugo/deploy-to-s3@main
         with:
-          artifact-name: ${{ env.artifact-name }}
+          artifact-name: ${{ needs.build-website.outputs.artifact-name }}
           artifact-directory: site
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
