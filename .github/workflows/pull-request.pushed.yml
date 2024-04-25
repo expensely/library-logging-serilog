@@ -22,6 +22,7 @@ jobs:
       commit-by: ${{ steps.get-version.outputs.commit-by }}
       commit-date: ${{ steps.get-version.outputs.commit-date }}
       commit-id: ${{ steps.get-version.outputs.commit-id }}
+      informational-version: ${{ steps.get-version.outputs.informational-version }}
       nuget-version-v2: ${{ steps.get-version.outputs.nuget-version-v2 }}
       sem-ver: ${{ steps.get-version.outputs.sem-ver }}
     steps:
@@ -91,7 +92,7 @@ jobs:
             --configuration Release \
             /p:AssemblyVersion=${{ needs.generate-version.outputs.assembly-sem-ver }} \
             /p:FileVersion=${{ needs.generate-version.outputs.assembly-sem-file-ver }} \
-            /p:PackageVersion=${{ needs.generate-version.outputs.nuget-version-v2 }} \
+            /p:AssemblyInformationalVersion=${{ needs.generate-version.outputs.informational-version }} \
             /p:Version=${{ needs.generate-version.outputs.sem-ver }}
 
 #      # Run Unit tests
@@ -172,12 +173,11 @@ jobs:
         run: |
           dotnet pack \
             src/Logging.Serilog/Logging.Serilog.csproj \
-            --no-build \ 
+            --no-build \
             --configuration Release \
-            --output src/Logging.Serilog/bin/Release/Packed 
-          
-#\
-#/p:PackageVersion=${{ needs.generate-version.outputs.nuget-version-v2 }}
+            --output src/Logging.Serilog/bin/Release/Packed \
+            /p:PackageVersion=${{ needs.generate-version.outputs.nuget-version-v2 }} \
+            /p:ContinuousIntegrationBuild=true
       - name: Archive
         uses: actions/upload-artifact@v4
         with:
