@@ -1,21 +1,22 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Serilog.Core;
 using Serilog.Events;
 
 namespace Logging.Serilog.Enrichers
 {
+    /// <summary>
+    /// Enricher for OpenTelemetry. This enricher will add a TraceId and SpanId to the log event.
+    /// </summary>
     public class OTel : ILogEventEnricher
     {
-        private readonly IHttpContextAccessor _contextAccessor;
-
-        public OTel() : this((IHttpContextAccessor)new HttpContextAccessor())
-        {
-        }
-
-        public OTel(IHttpContextAccessor contextAccessor) => this._contextAccessor = contextAccessor;
-
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+        /// <summary>
+        /// Enrich log event with TraceId and SpanId
+        /// </summary>
+        /// <param name="logEvent">Log event to enrich</param>
+        /// <param name="propertyFactory">Log event property factory</param>
+        public void Enrich(
+            LogEvent logEvent, 
+            ILogEventPropertyFactory propertyFactory)
         {
             var activity = Activity.Current;
 
