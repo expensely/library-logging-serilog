@@ -8,20 +8,20 @@ namespace Logging.Serilog.Enrichers
     /// <summary>
     /// Enricher for route pattern. This enricher will add the route pattern to the log event.
     /// </summary>
-    public class RoutePattern : ILogEventEnricher
+    public class RoutePatternEnricher : ILogEventEnricher
     {
         private readonly IHttpContextAccessor _contextAccessor;
 
         /// <summary>
         /// Create route pattern enricher. Creates a new instance of HttpContextAccessor.
         /// </summary>
-        public RoutePattern() : this(new HttpContextAccessor()) { }
+        public RoutePatternEnricher() : this(new HttpContextAccessor()) { }
 
         /// <summary>
         /// Create route pattern enricher.
         /// </summary>
         /// <param name="contextAccessor">HTTP context accessor</param>
-        public RoutePattern(IHttpContextAccessor contextAccessor)
+        public RoutePatternEnricher(IHttpContextAccessor contextAccessor)
         {
             _contextAccessor = contextAccessor;
         }

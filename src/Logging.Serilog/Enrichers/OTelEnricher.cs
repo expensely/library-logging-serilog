@@ -7,7 +7,7 @@ namespace Logging.Serilog.Enrichers
     /// <summary>
     /// Enricher for OpenTelemetry. This enricher will add a TraceId and SpanId to the log event.
     /// </summary>
-    public class OTel : ILogEventEnricher
+    public class OTelEnricher : ILogEventEnricher
     {
         /// <summary>
         /// Enrich log event with TraceId and SpanId
