@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using Serilog.Core;
 using Serilog.Events;
@@ -14,10 +15,21 @@ namespace Logging.Serilog.Enrichers
         /// </summary>
         /// <param name="logEvent">Log event to enrich</param>
         /// <param name="propertyFactory">Log event property factory</param>
+        /// <exception cref="ArgumentNullException">
+        ///     <list type="bullet">
+        ///         <item>When the <paramref name="logEvent"/> parameter is null.</item>
+        ///         <item>When the <paramref name="propertyFactory"/> parameter is null.</item>
+        ///     </list>
+        /// </exception>
         public void Enrich(
-            LogEvent logEvent, 
+            LogEvent logEvent,
             ILogEventPropertyFactory propertyFactory)
         {
+            if (logEvent == null)
+                throw new ArgumentNullException($"{nameof(logEvent)} cannot be null", nameof(logEvent));
+            if (propertyFactory == null)
+                throw new ArgumentNullException($"{nameof(propertyFactory)} cannot be null", nameof(propertyFactory));
+
             var activity = Activity.Current;
 
             if (activity != null)
