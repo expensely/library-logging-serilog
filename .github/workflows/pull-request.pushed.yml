@@ -98,21 +98,21 @@ jobs:
             /p:AssemblyInformationalVersion=${{ needs.generate-version.outputs.informational-version }} \
             /p:Version=${{ needs.generate-version.outputs.sem-ver }}
 
-#      # Run Unit tests
-#      - name: Test
-#        run: |
-#          dotnet test \
-#            --collect:"XPlat Code Coverage" \
-#            --no-build \ 
-#            --configuration ${{ env.configuration }} \
-#            --results-directory ./tests/results/Logging.Serilog/ \
-#            tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj \
-#            --settings tests/default.runsettings
-#      - name: Publish Unit Test Results
-#        uses: EnricoMi/publish-unit-test-result-action@v2
-#        with:
-#          files: |
-#            ./tests/results/Logging.Serilog/*.trx
+      # Run Unit tests
+      - name: Test
+        run: |
+          dotnet test \
+            --collect:"XPlat Code Coverage" \
+            --no-build \
+            --configuration ${{ env.configuration }} \
+            --results-directory ./tests/results/Logging.Serilog/ \
+            tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj \
+            --settings tests/default.runsettings
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: |
+            ./tests/results/Logging.Serilog/*.trx
 #      # Generate Coverage Report
 #      - name: Download Coverage History
 #        uses: joutvhu/download-s3@v1
