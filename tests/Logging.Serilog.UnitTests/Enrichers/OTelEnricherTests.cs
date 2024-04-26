@@ -1,5 +1,5 @@
 using AutoFixture;
-using AutoFixture.AutoNSubstitute;
+using AutoFixture.AutoMoq;
 using FluentAssertions;
 using Logging.Serilog.Enrichers;
 using Serilog.Core;
@@ -11,7 +11,7 @@ namespace Logging.Serilog.UnitTests.Enrichers;
 public class OTelEnricherTests
 {
     private readonly IFixture _fixture =
-        new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
+        new Fixture().Customize(new AutoMoqCustomization() { ConfigureMembers = true });
 
     [Fact]
     public void Enrich_NullLogEvent_ThrowsArgumentNullException()
