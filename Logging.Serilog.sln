@@ -16,6 +16,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{831DEA5A-6CE5-46EE-AF5D-D8B46C162504}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{640E8568-21E6-4835-9994-640E10EEF31A}"
+	ProjectSection(SolutionItems) = preProject
+		tests\default.runsettings = tests\default.runsettings
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.Serilog.UnitTests", "tests\Logging.Serilog.UnitTests\Logging.Serilog.UnitTests.csproj", "{2CD14EF1-0EC2-43C9-80E6-C42FBD1DF442}"
 EndProject
