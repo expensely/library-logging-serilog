@@ -12,7 +12,7 @@ public class OTelEnricherTests
 {
     private readonly IFixture _fixture =
         new Fixture().Customize(new AutoNSubstituteCustomization { ConfigureMembers = true });
-    
+
     [Fact]
     public void Enrich_NullLogEvent_ThrowsArgumentNullException()
     {
@@ -28,7 +28,7 @@ public class OTelEnricherTests
         act.Should().Throw<ArgumentNullException>()
             .WithMessage("logEvent (Parameter 'logEvent cannot be null')");
     }
-    
+
     [Fact]
     public void Enrich_NullPropertyFactory_ThrowsArgumentNullException()
     {
