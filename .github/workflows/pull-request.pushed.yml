@@ -105,18 +105,23 @@ jobs:
             --collect:"XPlat Code Coverage;Format=cobertura;IncludeTestAssembly=false" \
             --no-build \
             --configuration ${{ env.configuration }} \
-            --results-directory ./tests/results/Logging.Serilog/ \
+            --results-directory ./tests/results/ \
             --logger console \
             --logger "trx;logfilename=testResults.trx" \
             --logger "html;logfilename=testResults.html" \
             tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj
-
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           comment_mode: off
           files: |
-            ./tests/results/Logging.Serilog/*.trx
+            ./tests/results/*.trx
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: Test Results
+          path: tests/results/testResults.html
+
 #      # Generate Coverage Report
 #      - name: Download Coverage History
 #        uses: joutvhu/download-s3@v1
