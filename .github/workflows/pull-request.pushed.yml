@@ -105,7 +105,6 @@ jobs:
             --collect:"XPlat Code Coverage;Format=cobertura;IncludeTestAssembly=false" \
             --no-build \
             --configuration ${{ env.configuration }} \
-            --results-directory ./tests/results/ \
             --logger console \
             --logger "trx;logfilename=testResults.trx" \
             --logger "html;logfilename=testResults.html" \
