@@ -18,11 +18,11 @@ public class OTelEnricherTests
     {
         // Arrange
         var enricher = new OTelEnricher();
-        LogEvent logEvent = null;
+        LogEvent? logEvent = null;
         ILogEventPropertyFactory propertyFactory = _fixture.Create<ILogEventPropertyFactory>();
 
         // Act
-        Action act = () => enricher.Enrich(logEvent, propertyFactory);
+        Action act = () => enricher.Enrich(logEvent!, propertyFactory);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
@@ -35,10 +35,10 @@ public class OTelEnricherTests
         // Arrange
         var enricher = new OTelEnricher();
         LogEvent logEvent = _fixture.Create<LogEvent>();
-        ILogEventPropertyFactory propertyFactory = null;
+        ILogEventPropertyFactory? propertyFactory = null;
 
         // Act
-        Action act = () => enricher.Enrich(logEvent, propertyFactory);
+        Action act = () => enricher.Enrich(logEvent, propertyFactory!);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()

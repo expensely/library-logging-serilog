@@ -106,32 +106,35 @@ jobs:
             --no-build \
             --configuration ${{ env.configuration }} \
             --logger console \
-            --logger "trx;logfilename=testResults.trx" \
-            --logger "html;logfilename=testResults.html" \
-            tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj
+            --logger GitHubActions \
+            --logger trx \
+            --logger html \
+            tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj \
+            -- \
+            RunConfiguration.CollectSourceInformation=true
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           comment_mode: off
           files: |
-            ./tests/results/*.trx
+            tests/Logging.Serilog.UnitTests/TestResults/*.trx
       - name: Archive
         uses: actions/upload-artifact@v4
         with:
           name: Test Results
-          path: tests/results/testResults.html
+          path: tests/Logging.Serilog.UnitTests/TestResults
 
-#      # Generate Coverage Report
-#      - name: Download Coverage History
-#        uses: joutvhu/download-s3@v1
-#        with:
-#          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          aws_region: ap-southeast-2
-#          aws_bucket: gavanlamb-github-actions-assets
-#          source: ${{ github.repository }}/main/history
-#          target: coverage/history
-#
+      # Generate Coverage Report
+      - name: Download Coverage History
+        uses: joutvhu/download-s3@v1
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ap-southeast-2
+          aws_bucket: gavanlamb-github-actions-assets
+          source: ${{ github.repository }}/main/history
+          target: coverage/history
+
 #      - name: Generate Coverage Report
 #        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.2
 #        with:
