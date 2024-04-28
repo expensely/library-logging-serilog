@@ -9,6 +9,12 @@ concurrency:
   cancel-in-progress: false
   group: pull-request-${{ github.ref_name }}
 
+permissions:
+  contents: read
+  issues: read
+  checks: write
+  pull-requests: write
+
 jobs:
   generate-version:
     name: Generate Version
@@ -106,23 +112,26 @@ jobs:
             --no-build \
             --configuration ${{ env.configuration }} \
             --logger console \
-            --logger GitHubActions \
             --logger trx \
             --logger html \
-            tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj \
-            -- \
-            RunConfiguration.CollectSourceInformation=true
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        with:
-          comment_mode: off
-          files: |
-            tests/Logging.Serilog.UnitTests/TestResults/*.trx
+            tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj
       - name: Archive
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: Test Results
           path: tests/Logging.Serilog.UnitTests/TestResults
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          action_fail: true
+          check_run_annotations: all tests, skipped tests
+          check_run: false
+          comment_mode: always
+          report_individual_runs: true
+          files: |
+            tests/Logging.Serilog.UnitTests/TestResults/*.trx
 
       # Generate Coverage Report
       - name: Download Coverage History
