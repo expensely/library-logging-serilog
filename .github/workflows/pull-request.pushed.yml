@@ -9,11 +9,6 @@ concurrency:
   cancel-in-progress: false
   group: pull-request-${{ github.ref_name }}
 
-permissions:
-  contents: read
-  issues: read
-  checks: write
-  pull-requests: write
 
 jobs:
   generate-version:
@@ -46,11 +41,16 @@ jobs:
     env:
       artifact-name: Package
       configuration: Release
+    needs:
+      - generate-version
     outputs:
       artifact-name: ${{ env.artifact-name }}
       configuration: ${{ env.configuration }}
-    needs:
-      - generate-version
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         name: Checkout
@@ -139,49 +139,56 @@ jobs:
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: ap-southeast-2
-          aws_bucket: gavanlamb-github-actions-assets
-          source: ${{ github.repository }}/main/history
+          aws_region: ${{ vars.AWS_DEFAULT_REGION }}
+          aws_bucket: ${{ vars.AWS_S3_CICD_BUCKET }}
+          source: ${{ github.repository }}/build/main/tests/unit/coverage/history
           target: coverage/history
-
-#      - name: Generate Coverage Report
-#        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.2
-#        with:
-#          reports: ./tests/results/Logging.Serilog/**/coverage.cobertura.xml
-#          targetdir: coverage/reports
-#          historydir: coverage/history
-#          reporttypes: Html;MarkdownSummaryGithub;Badges
-#          sourcedirs: ./
-#          assemblyfilters: '+*' # Optional list of assemblies that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
-#          classfilters: '+*' # Optional list of classes that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
-#          filefilters: '+*' # Optional list of files that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
-#          verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
-#          title: ${{ steps.version.outputs.NuGetPackageVersion }}
-#          tag: ${{ steps.version.outputs.NuGetPackageVersion }}
-#          license: ${{ secrets.REPORT_GENERATOR_LICENSE }}
-#          customSettings: settings:maximumNumberOfHistoricCoverageFiles=100;settings:createSubdirectoryForAllReportTypes=true
-#          #plugins: '' # Optional plugin files for custom reports or custom history storage (separated by semicolon).
-#          # TODO add plugin for uploading to S3
-#
-#      - name: Push Coverage Assets
-#        uses: shallwefootball/s3-upload-action@master
-#        with:
-#          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          aws_bucket: gavanlamb-github-actions-assets
-#          source_dir: coverage/reports
-#          destination_dir: ${{ github.repository }}/${{ github.head_ref }}/coverage
-#
-#      - name: Push Coverage Report History
-#        uses: shallwefootball/s3-upload-action@master
-#        if: ${{ github.base_ref == 'main' }}
-#        with:
-#          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          aws_bucket: gavanlamb-github-actions-assets
-#          source_dir: coverage/history
-#          destination_dir: ${{ github.repository }}/${{ github.head_ref }}/coverage/history
-#
+      - name: Generate Coverage Report
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.2
+        with:
+          reports: ./tests/Logging.Serilog.UnitTests/TestResults/**/coverage.cobertura.xml
+          targetdir: coverage/reports
+          historydir: coverage/history
+          reporttypes: Html;MarkdownSummaryGithub;Badges
+          sourcedirs: ./
+          assemblyfilters: '+*' # Optional list of assemblies that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
+          classfilters: '+*' # Optional list of classes that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
+          filefilters: '+*' # Optional list of files that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
+          verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+          title: ${{ needs.generate-version.outputs.nuget-version-v2 }}
+          tag: ${{ needs.generate-version.outputs.nuget-version-v2 }}
+          license: ${{ secrets.REPORT_GENERATOR_LICENSE }}
+          customSettings: settings:maximumNumberOfHistoricCoverageFiles=100;settings:createSubdirectoryForAllReportTypes=true
+          #plugins: '' # Optional plugin files for custom reports or custom history storage (separated by semicolon).
+          # TODO add plugin for uploading to S3
+      - uses: jakejarvis/s3-sync-action@master
+        name: Upload coverage history to S3
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{ vars.AWS_S3_CICD_BUCKET }}
+          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: coverage/history
+          DEST_DIR: ${{ github.repository }}/build/main/tests/unit/coverage/history
+      - uses: jakejarvis/s3-sync-action@master
+        name: Upload coverage report to S3
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{ vars.AWS_S3_CICD_BUCKET }}
+          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: coverage/reports
+          DEST_DIR: ${{ github.repository }}/build/${{ github.head_ref }}/tests/unit/coverage
+      - uses: mshick/add-pr-comment@v2
+        name: Add dotnet outdated comment to PR
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        with:
+          message-path: coverage/reports/MarkdownSummaryGithub/SummaryGithub.md
+          message-id: unittests-coverage:${{ github.head_ref }}
 #      # Mutation test
 #      - name: Install Stryker
 #        run: dotnet tool install dotnet-stryker -g
