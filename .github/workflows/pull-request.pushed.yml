@@ -161,17 +161,17 @@ jobs:
           customSettings: settings:maximumNumberOfHistoricCoverageFiles=100;settings:createSubdirectoryForAllReportTypes=true
           #plugins: '' # Optional plugin files for custom reports or custom history storage (separated by semicolon).
           # TODO add plugin for uploading to S3
-      - uses: jakejarvis/s3-sync-action@master
-        name: Upload coverage history to S3
-        with:
-          args: --acl public-read --delete
-        env:
-          AWS_S3_BUCKET: ${{ vars.AWS_S3_CICD_BUCKET }}
-          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: coverage/history
-          DEST_DIR: ${{ github.repository }}/build/main/tests/unit/coverage/history
+#      - uses: jakejarvis/s3-sync-action@master
+#        name: Upload coverage history to S3
+#        with:
+#          args: --acl public-read --delete
+#        env:
+#          AWS_S3_BUCKET: ${{ vars.AWS_S3_CICD_BUCKET }}
+#          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+#          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          SOURCE_DIR: coverage/history
+#          DEST_DIR: ${{ github.repository }}/build/main/tests/unit/coverage/history
       - uses: jakejarvis/s3-sync-action@master
         name: Upload coverage report to S3
         with:
@@ -189,20 +189,24 @@ jobs:
         with:
           message-path: coverage/reports/MarkdownSummaryGithub/SummaryGithub.md
           message-id: unittests-coverage:${{ github.head_ref }}
-#      # Mutation test
-#      - name: Install Stryker
-#        run: dotnet tool install dotnet-stryker -g
-#      - name: Run Stryker
-#        run: dotnet stryker --output mutation --config-file stryker-config.json --version "${{ github.head_ref }}" --dashboard-api-key "${{ secrets.STRYKER_API_KEY }}"
-#      - name: Push Mutation Report
-#        uses: shallwefootball/s3-upload-action@master
-#        with:
-#          aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          aws_bucket: gavanlamb-github-actions-assets
-#          source_dir: mutation/reports
-#          destination_dir: ${{ github.repository }}/${{ github.head_ref }}/mutation
-#
+
+      # Mutation test
+      - name: Install Stryker
+        run: dotnet tool install dotnet-stryker -g
+      - name: Run Stryker
+        run: dotnet stryker --output mutation --solution ./Logging.Serilog.sln --version "${{ github.head_ref }}" #--dashboard-api-key "${{ secrets.STRYKER_API_KEY }}"
+      - uses: jakejarvis/s3-sync-action@master
+        name: Upload mutation report to S3
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{ vars.AWS_S3_CICD_BUCKET }}
+          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: mutation/reports
+          DEST_DIR: ${{ github.repository }}/build/${{ github.head_ref }}/tests/unit/mutation
+
       # Pack
       - name: Pack
         run: |
