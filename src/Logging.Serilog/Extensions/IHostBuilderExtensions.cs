@@ -56,7 +56,7 @@ public static class IHostBuilderExtensions
             .ConfigureLogging((hostContext, loggingBuilder) =>
             {
                 loggingBuilder.ClearProviders();
-            
+
                 Log.Logger = new LoggerConfiguration()
                     .ReadFrom.Configuration(hostContext.Configuration)
                     .Enrich.FromLogContext()
@@ -74,7 +74,7 @@ public static class IHostBuilderExtensions
                     .WriteTo.Console(new JsonFormatter(renderMessage: false))
                     .CreateLogger();
                 Log.Information(firstMessage);
-                
+
                 loggingBuilder.Services.AddSingleton(Log.Logger);
             })
             .UseSerilog();
