@@ -9,22 +9,15 @@ ProjectSection(SolutionItems) = preProject
 	README.md = README.md
 EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{F9B62969-1AA2-48C7-8C8A-5776DAD1561C}"
-ProjectSection(SolutionItems) = preProject
-	pipelines\release.yml = pipelines\release.yml
-	pipelines\preview.yml = pipelines\preview.yml
-EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{35DF2805-2A3A-40A3-9EE5-162C3516E098}"
-ProjectSection(SolutionItems) = preProject
-	pipelines\templates\build.yml = pipelines\templates\build.yml
-	pipelines\templates\promote.yml = pipelines\templates\promote.yml
-	pipelines\templates\push.yml = pipelines\templates\push.yml
-EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.Serilog.Sample.WebAPI", "samples\Logging.Serilog.Sample.WebAPI\Logging.Serilog.Sample.WebAPI.csproj", "{29ED41AC-3100-4EC3-BA77-DA514EF20CA9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.Serilog.Sample.WorkerService", "samples\Logging.Serilog.Sample.WorkerService\Logging.Serilog.Sample.WorkerService.csproj", "{45CE0E55-7D73-4086-AB78-A4B48184A047}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{831DEA5A-6CE5-46EE-AF5D-D8B46C162504}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{640E8568-21E6-4835-9994-640E10EEF31A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging.Serilog.UnitTests", "tests\Logging.Serilog.UnitTests\Logging.Serilog.UnitTests.csproj", "{2CD14EF1-0EC2-43C9-80E6-C42FBD1DF442}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,9 +37,15 @@ Global
 		{45CE0E55-7D73-4086-AB78-A4B48184A047}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45CE0E55-7D73-4086-AB78-A4B48184A047}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45CE0E55-7D73-4086-AB78-A4B48184A047}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CD14EF1-0EC2-43C9-80E6-C42FBD1DF442}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CD14EF1-0EC2-43C9-80E6-C42FBD1DF442}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CD14EF1-0EC2-43C9-80E6-C42FBD1DF442}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CD14EF1-0EC2-43C9-80E6-C42FBD1DF442}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BF383A20-7261-4D7F-92EF-C43D0E313787} = {A5AE21A5-04AB-4D2F-BBBC-A0DD7778C1D7}
-		{35DF2805-2A3A-40A3-9EE5-162C3516E098} = {F9B62969-1AA2-48C7-8C8A-5776DAD1561C}
+		{29ED41AC-3100-4EC3-BA77-DA514EF20CA9} = {831DEA5A-6CE5-46EE-AF5D-D8B46C162504}
+		{45CE0E55-7D73-4086-AB78-A4B48184A047} = {831DEA5A-6CE5-46EE-AF5D-D8B46C162504}
+		{2CD14EF1-0EC2-43C9-80E6-C42FBD1DF442} = {640E8568-21E6-4835-9994-640E10EEF31A}
 	EndGlobalSection
 EndGlobal

@@ -2,7 +2,6 @@
 using Logging.Serilog.Enrichers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Enrichers.Span;
@@ -55,36 +54,33 @@ public static class WebApplicationBuilderExtensions
         if (string.IsNullOrWhiteSpace(firstMessage))
             throw new ArgumentException($"{nameof(firstMessage)} cannot be empty", nameof(firstMessage));
 
-        webApplicationBuilder.Host
-            .ConfigureLogging(logging => {
-                logging.ClearProviders();
-                
-                logging.Services.AddHttpContextAccessor();
-            
-                Log.Logger = new LoggerConfiguration()
-                    .ReadFrom.Configuration(webApplicationBuilder.Configuration)
-                    .Enrich.FromLogContext()
-                    .Enrich.WithAssemblyName()
-                    .Enrich.WithAssemblyVersion()
-                    .Enrich.WithEnvironmentVariable(environmentVariableName, "Environment")
-                    .Enrich.WithExceptionDetails()
-                    .Enrich.WithMachineName()
-                    .Enrich.With<OTel>()
-                    .Enrich.With<RoutePattern>()
-                    .Enrich.WithThreadId()
-                    .Enrich.WithThreadName()
-                    .Enrich.WithProcessId()
-                    .Enrich.WithProcessName()
-                    .Enrich.WithRequestUserId()
-                    .Enrich.WithSpan()
-                    .Destructure.ToMaximumCollectionCount(maximumCollection)
-                    .Destructure.ToMaximumDepth(maximumDepth)
-                    .WriteTo.Console(new JsonFormatter(renderMessage: false))
-                    .CreateLogger();
-                Log.Information(firstMessage);
-                logging.Services.AddSingleton(Log.Logger);
-            })
-            .UseSerilog();
+        webApplicationBuilder.Logging.ClearProviders();
+        webApplicationBuilder.Services.AddHttpContextAccessor();
+
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(webApplicationBuilder.Configuration)
+            .Enrich.FromLogContext()
+            .Enrich.WithAssemblyName()
+            .Enrich.WithAssemblyVersion()
+            .Enrich.WithEnvironmentVariable(environmentVariableName, "Environment")
+            .Enrich.WithExceptionDetails()
+            .Enrich.WithMachineName()
+            .Enrich.With<OTelEnricher>()
+            .Enrich.With<RoutePatternEnricher>()
+            .Enrich.WithThreadId()
+            .Enrich.WithThreadName()
+            .Enrich.WithProcessId()
+            .Enrich.WithProcessName()
+            .Enrich.WithRequestUserId()
+            .Enrich.WithSpan()
+            .Destructure.ToMaximumCollectionCount(maximumCollection)
+            .Destructure.ToMaximumDepth(maximumDepth)
+            .WriteTo.Console(new JsonFormatter(renderMessage: false))
+            .CreateLogger();
+        Log.Information(firstMessage);
+        webApplicationBuilder.Logging.AddSerilog(Log.Logger);
+
+        webApplicationBuilder.Host.UseSerilog();
 
         return webApplicationBuilder;
     }

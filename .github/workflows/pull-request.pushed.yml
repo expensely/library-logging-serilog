@@ -1,0 +1,341 @@
+﻿name: 'Pull request: pushed'
+
+on:
+  pull_request:
+    branches-ignore:
+      - main
+
+concurrency:
+  cancel-in-progress: false
+  group: pull-request-${{ github.ref_name }}
+
+jobs:
+  generate-version:
+    name: Generate Version
+    runs-on: ubuntu-latest
+    outputs:
+      assembly-sem-ver: ${{ steps.get-version.outputs.assembly-sem-ver }}
+      assembly-sem-file-ver: ${{ steps.get-version.outputs.assembly-sem-file-ver }}
+      commit-by: ${{ steps.get-version.outputs.commit-by }}
+      commit-date: ${{ steps.get-version.outputs.commit-date }}
+      commit-id: ${{ steps.get-version.outputs.commit-id }}
+      informational-version: ${{ steps.get-version.outputs.informational-version }}
+      nuget-version-v2: ${{ steps.get-version.outputs.nuget-version-v2 }}
+      sem-ver: ${{ steps.get-version.outputs.sem-ver }}
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Get version
+        uses: gavanlamb/github-actions/.github/actions/version/get@main
+        id: get-version
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+
+  build-package:
+    name: Build Package
+    runs-on: ubuntu-latest
+    env:
+      artifact-name: Package
+      configuration: Release
+    needs:
+      - generate-version
+    outputs:
+      artifact-name: ${{ env.artifact-name }}
+      configuration: ${{ env.configuration }}
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # Restore packages
+      - name: Restore
+        run: dotnet restore --no-cache Logging.Serilog.sln
+      
+      # Check outdated packages 
+      ## TODO - replace 'Add dotnet outdated comment to PR' with a task that adds annotations to the PR
+      - name: Install dotnet outdated
+        run: dotnet tool update dotnet-outdated-tool -g
+      - name: Check outdated packages
+        id: dotnet-outdated
+        run: |
+          mkdir -p artifacts/outdated
+          OUTPUT_FILE="artifacts/outdated/outdated.md"
+          echo "file-path=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+
+          dotnet outdated --no-restore --output-format Markdown --output "$OUTPUT_FILE" 
+
+          if [ ! -e "$OUTPUT_FILE" ]; then
+            echo "# No Outdated Packages" >> $OUTPUT_FILE
+          fi
+      - uses: mshick/add-pr-comment@v2
+        name: Add dotnet outdated comment to PR
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        with:
+          message-path: ${{ steps.dotnet-outdated.outputs.file-path }}
+          message-id: dotnet-outdate:${{ github.head_ref }}
+
+      # Lint
+      - name: Lint
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: zyactions/dotnet-lint@v1
+        with:
+          workspace: Logging.Serilog.sln
+          implicit-restore: false
+
+      # Build
+      - name: Build
+        run: | 
+          dotnet build \
+            --no-restore \
+            --configuration ${{ env.configuration }} \
+            /p:AssemblyVersion=${{ needs.generate-version.outputs.assembly-sem-ver }} \
+            /p:FileVersion=${{ needs.generate-version.outputs.assembly-sem-file-ver }} \
+            /p:AssemblyInformationalVersion=${{ needs.generate-version.outputs.informational-version }} \
+            /p:Version=${{ needs.generate-version.outputs.sem-ver }}
+
+      # Run Unit tests
+      ## GENERATE HTML REPORT AND PUBLISH TO S3
+      - name: Test
+        run: |
+          dotnet test \
+            --collect:"XPlat Code Coverage;Format=cobertura;IncludeTestAssembly=false" \
+            --no-build \
+            --configuration ${{ env.configuration }} \
+            --logger console \
+            --logger trx \
+            --logger html \
+            tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Unit Tests Results
+          path: tests/Logging.Serilog.UnitTests/TestResults
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          action_fail: true
+          check_run_annotations: all tests, skipped tests
+          check_run: false
+          comment_mode: always
+          report_individual_runs: true
+          files: |
+            tests/Logging.Serilog.UnitTests/TestResults/*.trx
+
+      # Generate Coverage Report
+      - name: Download Coverage History
+        uses: joutvhu/download-s3@v1
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ vars.AWS_DEFAULT_REGION }}
+          aws_bucket: ${{ vars.AWS_S3_CICD_BUCKET }}
+          source: ${{ github.repository }}/build/main/tests/unit/coverage/history
+          target: coverage/history
+      - name: Generate Coverage Report
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.2
+        with:
+          reports: ./tests/Logging.Serilog.UnitTests/TestResults/**/coverage.cobertura.xml
+          targetdir: coverage/reports
+          historydir: coverage/history
+          reporttypes: Html;MarkdownSummaryGithub;Badges
+          sourcedirs: ./
+          assemblyfilters: '+*' # Optional list of assemblies that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
+          classfilters: '+*' # Optional list of classes that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
+          filefilters: '+*' # Optional list of files that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
+          verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+          title: ${{ needs.generate-version.outputs.nuget-version-v2 }}
+          tag: ${{ needs.generate-version.outputs.nuget-version-v2 }}
+          license: ${{ secrets.REPORT_GENERATOR_LICENSE }}
+          customSettings: settings:maximumNumberOfHistoricCoverageFiles=100;settings:createSubdirectoryForAllReportTypes=true
+          #plugins: '' # Optional plugin files for custom reports or custom history storage (separated by semicolon).
+          # TODO add plugin for uploading to S3
+      - uses: jakejarvis/s3-sync-action@master
+        name: Upload coverage history to S3
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{ vars.AWS_S3_CICD_BUCKET }}
+          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: coverage/history
+          DEST_DIR: ${{ github.repository }}/build/main/tests/unit/coverage/history
+      - uses: jakejarvis/s3-sync-action@master
+        name: Upload coverage report to S3
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{ vars.AWS_S3_CICD_BUCKET }}
+          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: coverage/reports
+          DEST_DIR: ${{ github.repository }}/build/${{ github.head_ref }}/tests/unit/coverage
+      - uses: mshick/add-pr-comment@v2
+        name: Add dotnet outdated comment to PR
+        if: ${{ always() && github.event_name == 'pull_request' }}
+        with:
+          message-path: coverage/reports/MarkdownSummaryGithub/SummaryGithub.md
+          message-id: unittests-coverage:${{ github.head_ref }}
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unit Tests Coverage Report
+          path: coverage/reports
+
+      # Mutation test
+      - name: Install
+        run: dotnet tool install dotnet-stryker -g
+      - name: Run
+        run: | 
+          dotnet stryker \
+          --output mutation \
+          --reporter "html" \
+          --reporter "json" \
+          --reporter "progress" \
+          --reporter "cleartext" \
+          --version "${{ github.head_ref }}" \
+          --config-file "stryker-config.json"
+      - uses: jakejarvis/s3-sync-action@master
+        name: Upload to S3
+        with:
+          args: --acl public-read --delete
+        env:
+          AWS_S3_BUCKET: ${{ vars.AWS_S3_CICD_BUCKET }}
+          AWS_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: mutation/reports
+          DEST_DIR: ${{ github.repository }}/build/${{ github.head_ref }}/tests/unit/mutation
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unit Tests Mutation Report
+          path: mutation/reports
+
+      # Pack
+      - name: Pack
+        run: |
+          dotnet pack \
+            src/Logging.Serilog/Logging.Serilog.csproj \
+            --no-build \
+            --configuration ${{ env.configuration }} \
+            --output src/Logging.Serilog/bin/${{ env.configuration }}/Packed \
+            /p:PackageVersion=${{ needs.generate-version.outputs.nuget-version-v2 }} \
+            /p:ContinuousIntegrationBuild=true
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.artifact-name }}
+          path: src/Logging.Serilog/bin/${{ env.configuration }}/Packed
+
+  build-website:
+    name: Build Website
+    runs-on: ubuntu-latest
+    env:
+      artifact-name: Website
+    outputs:
+      artifact-name: ${{ env.artifact-name }}
+    needs:
+      - generate-version
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Install NPM packages
+        shell: bash
+        run: |
+          npm ci
+        working-directory: docs
+      - name: Build
+        shell: bash
+        run: |
+          npm run build:production
+        working-directory: docs
+      - name: Generate version file
+        shell: bash
+        run: |
+          JSON_STRING=$(jq -n \
+            --arg commit-by "${{ needs.generate-version.outputs.commit-by }}" \
+            --arg commit-date "${{ needs.generate-version.outputs.commit-date }}" \
+            --arg commit-id "${{ needs.generate-version.outputs.commit-id }}" \
+            --arg version "${{ needs.generate-version.outputs.sem-ver }}" \
+            '$ARGS.named')
+
+          echo "$JSON_STRING" | jq . > "public/version.json"
+        working-directory: docs
+      - name: Create directories
+        shell: bash
+        run: |
+          mkdir -p docs/public/badges
+      - name: Create badge for version
+        uses: emibcn/badge-action@v2.0.2
+        with:
+          label: Site version
+          status: ${{ needs.generate-version.outputs.sem-ver }}
+          path: docs/public/badges/version.svg
+      - name: Archive
+        uses: gavanlamb/github-actions/.github/actions/archive@main
+        with:
+          artifact-name: ${{ env.artifact-name }}
+          source-directory: docs/public
+          destination-directory: docs
+      - name: Send message
+        uses: gavanlamb/github-actions/.github/actions/slack/built@main
+        if: always()
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          version: ${{ needs.generate-version.outputs.sem-ver }}
+          status: ${{ job.status }}
+          include-integration-tests: 'false'
+          include-unit-tests: 'false'
+
+  preview:
+    name: Preview
+    runs-on: ubuntu-latest
+    needs: 
+     - build-package
+     - build-website
+    env:
+      site-path: ${{ github.repository }}/release/preview${{ github.event.pull_request.number }}/site
+    environment: 
+      url: https://gavanlamb-github-actions-assets.s3.ap-southeast-2.amazonaws.com/${{ env.site-path }}/index.html
+      name: Preview${{ github.event.pull_request.number }}
+    steps:
+      - name: Deploy ${{ needs.build-website.outputs.artifact-name }}
+        uses: gavanlamb/github-actions/.github/actions/hugo/deploy-to-s3@main
+        with:
+          artifact-name: ${{ needs.build-website.outputs.artifact-name }}
+          artifact-directory: site
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-s3-bucket: ${{ vars.AWS_S3_CICD_BUCKET }}
+          aws-s3-path: ${{ env.site-path }}
+          aws-s3-region: ${{ vars.AWS_DEFAULT_REGION }}
+      - name: Send message
+        uses: gavanlamb/github-actions/.github/actions/slack/released@main
+        if: always()
+        with:
+          environment: Preview${{ github.event.pull_request.number }}
+          include-system-tests: 'false'
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          status: ${{ job.status }}
+          version: ${{ needs.generate-version.outputs.sem-ver }}

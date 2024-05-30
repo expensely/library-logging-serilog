@@ -1,0 +1,18 @@
+{
+  "stryker-config": {
+    "solution": "Logging.Serilog.sln",
+    "test-projects": [
+      "tests/Logging.Serilog.UnitTests/Logging.Serilog.UnitTests.csproj"
+    ],
+    "mutation-level": "advanced",
+    "report-file-name": "mutation-report",
+    "additional-timeout": 5000,
+    "concurrency": 10,
+    "thresholds": {
+      "high": 80,
+      "low": 40,
+      "break": 0
+    },
+    "coverage-analysis": "perTest"
+  }
+}
