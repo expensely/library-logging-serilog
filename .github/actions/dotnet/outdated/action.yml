@@ -1,0 +1,237 @@
+name: Check outdated .NET packages
+description: Check outdated .NET packages
+inputs:
+  add-comment-to-pr:
+    description: Specifies whether to add a comment to the PR with the outdated packages report
+    required: false
+    default: 'false'
+  ignore-failed-sources:
+    description: Treat package source failures as warnings
+    required: false
+    default: 'false'
+  include-auto-references:
+    description: Specifies whether to include auto-referenced packages
+    required: false
+    default: 'false'
+  include-package-versions-older-than:
+    description: Include all dependencies in the report even the ones not outdated
+    required: false
+  include-transitive-dependencies:
+    description: Specifies whether it should detect transitive dependencies
+    required: false
+  include-up-to-date:
+    description: Only include package versions that are older than the specified number of days
+    required: false
+  pre-release-mode:
+    description: Specifies whether to look for pre-release versions of packages. Possible values are Auto (default), Always or Never
+    required: false
+  recursive:
+    description: Recursively search for all projects within the provided directory
+    required: false
+    default: 'false'
+  restore-packages:
+    description: Add the reference with performing restore preview and compatibility check
+    required: false
+    default: 'false'
+  transitive-depth:
+    description: Defines how many levels deep transitive dependencies should be analyzed. Integer value (default = 1)
+    required: false
+  upgrade-packages:
+    description: Specifies whether outdated packages should be upgraded
+    required: false
+    default: 'false'
+  version-lock-mode:
+    description: Specifies whether the package should be locked to the current Major or Minor version. Possible values are None (default), Major or Minor
+    required: false
+    default: 'None'
+runs:
+  using: composite
+  steps:
+    - name: Install dotnet outdated
+      shell: bash
+      run: |
+        dotnet tool update dotnet-outdated-tool -g --version 4.6.4
+    - name: Check outdated packages
+      id: dotnet-outdated
+      shell: bash
+      run: |
+        arguments=""
+
+        IGNORE_FAILED_SOURCES="${{ inputs.ignore-failed-sources }}"
+        if [ "${IGNORE_FAILED_SOURCES,,}" == "true" ]; then
+          arguments="$arguments --ignore-failed-sources"
+        fi
+
+        INCLUDE_AUTO_REFERENCES="${{ inputs.include-auto-references }}"
+        if [ "${INCLUDE_AUTO_REFERENCES,,}" == "true" ]; then
+          arguments="$arguments --include-auto-references"
+        fi
+
+        INCLUDE_PACKAGE_VERSIONS_OLDER_THAN="${{ inputs.include-package-versions-older-than }}"
+        if [ -n "$INCLUDE_PACKAGE_VERSIONS_OLDER_THAN" ]; then
+          arguments="$arguments --include-package-versions-older-than $INCLUDE_PACKAGE_VERSIONS_OLDER_THAN"
+        fi
+
+        INCLUDE_UP_TO_DATE="${{ inputs.include-up-to-date }}"
+        if [ "${INCLUDE_UP_TO_DATE,,}" == "true" ]; then
+          arguments="$arguments --include-up-to-date"
+        fi
+
+        PRE_RELEASE_MODE="${{ inputs.pre-release-mode }}"
+        if [ -n "$PRE_RELEASE_MODE" ]; then
+          VALID_PRE_RELEASE_OPTIONS=("Auto" "Always" "Never")
+          if [[ ! " ${VALID_PRE_RELEASE_OPTIONS[@]} " =~ " $PRE_RELEASE_MODE " ]]; then
+            echo "Invalid pre-release option: $PRE_RELEASE_MODE. Valid options are Auto, Always, or Never."
+            exit 1
+          fi
+          arguments="$arguments --pre-release $PRE_RELEASE_MODE"
+        fi
+
+        INCLUDE_TRANSITIVE_DEPENDENCIES="${{ inputs.include-transitive-dependencies }}"
+        if [ "${INCLUDE_TRANSITIVE_DEPENDENCIES,,}" == "true" ]; then
+          arguments="$arguments --transitive"
+        fi
+
+        RESTORE_PACKAGES="${{ inputs.restore-packages }}"
+        if [ "${RESTORE_PACKAGES,,}" == "true" ]; then
+          arguments="$arguments --restore-packages"
+        fi
+
+        RECURSIVE="${{ inputs.recursive }}"
+        if [ "${RECURSIVE,,}" == "true" ]; then
+          arguments="$arguments --recursive"
+        fi
+
+        TRANSITIVE_DEPTH="${{ inputs.transitive-depth }}"
+        if [ -n "$TRANSITIVE_DEPTH" ]; then
+          if ! [[ "$TRANSITIVE_DEPTH" =~ ^[0-9]+$ ]]; then
+            echo "Invalid transitive-depth value: $TRANSITIVE_DEPTH. It must be an integer."
+            exit 1
+          fi
+          arguments="$arguments --transitive-depth $TRANSITIVE_DEPTH"
+        fi
+
+        UPGRADE_PACKAGES="${{ inputs.upgrade-packages }}"
+        if [ "${UPGRADE_PACKAGES,,}" == "true" ]; then
+          arguments="$arguments --upgrade"
+        fi
+
+        VERSION_LOCK_MODE="${{ inputs.version-lock-mode }}"
+        if [ -n "$VERSION_LOCK_MODE" ]; then
+          VALID_VERSION_LOCK_OPTIONS=("None" "Major" "Minor")
+          if [[ ! " ${VALID_VERSION_LOCK_OPTIONS[@]} " =~ " $VERSION_LOCK_MODE " ]]; then
+            echo "Invalid version-lock option: $VERSION_LOCK_MODE. Valid options are None, Major, or Minor."
+            exit 1
+          fi
+          if [ "$VERSION_LOCK_MODE" != "None" ]; then
+            arguments="$arguments --version-lock $VERSION_LOCK_MODE"
+          fi
+        fi
+
+        mkdir -p artifacts/dotnet/outdated
+        
+        JSON_OUTPUT_FILE="artifacts/dotnet/outdated/outdated.json"
+        if ! dotnet outdated --output-format Json --output $JSON_OUTPUT_FILE $arguments; then
+          echo "Error: Failed to generate output file."
+          exit 1
+        fi
+        echo "json-file-path=$JSON_OUTPUT_FILE" >> $GITHUB_OUTPUT
+        
+        MARKDOWN_OUTPUT_FILE="artifacts/dotnet/outdated/outdated.md"
+        if ! dotnet outdated --output-format Markdown --output $MARKDOWN_OUTPUT_FILE $arguments; then
+          echo "Error: Failed to generate output file."
+          exit 1
+        fi
+        echo "markdown-file-path=$MARKDOWN_OUTPUT_FILE" >> $GITHUB_OUTPUT
+
+    - name: Add or update comment to PR
+      if: ${{ inputs.add-comment-to-pr == 'true' && github.event_name == 'pull_request' }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        OWNER=${{ github.repository_owner }}
+        REPO=$(basename ${{ github.repository }})
+        PR_NUMBER=${{ github.event.pull_request.number }}
+        COMMENT_IDENTIFIER="<!-- dotnet-outdated-comment:${{ github.head_ref }} -->"
+        API_URL="https://api.github.com/repos/$OWNER/$REPO/issues/$PR_NUMBER/comments"
+
+        # Fetch existing comments
+        COMMENTS_RESPONSE=$(curl -s -w "%{http_code}" -o comments.json -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" "$API_URL")
+        COMMENTS=$(cat comments.json)
+
+        if [ "$COMMENTS_RESPONSE" -eq 200 ]; then
+          echo "Successfully fetched existing comments."
+        elif [ "$COMMENTS_RESPONSE" -eq 404 ]; then
+          echo "Error: Resource not found. HTTP status code: $COMMENTS_RESPONSE"
+          exit 1
+        elif [ "$COMMENTS_RESPONSE" -eq 410 ]; then
+          echo "Error: Resource gone. HTTP status code: $COMMENTS_RESPONSE"
+          exit 1
+        else
+          echo "Error fetching comments. HTTP status code: $COMMENTS_RESPONSE"
+          exit 1
+        fi
+
+        # Check if the comment already exists
+        COMMENT_ID=$(echo "$COMMENTS" | jq -r --arg COMMENT_IDENTIFIER "$COMMENT_IDENTIFIER" '.[] | select(.body | test("^" + $COMMENT_IDENTIFIER)) | .id')
+
+        OUTPUT_FILE="${{ steps.dotnet-outdated.outputs.markdown-file-path }}"
+        COMMENT=""
+        if [ -f "$OUTPUT_FILE" ]; then
+          COMMENT=$(cat $OUTPUT_FILE)
+        fi
+
+        if [ -n "$COMMENT_ID" ]; then
+          if [ -z "$COMMENT" ]; then
+            # Delete existing comment
+            DELETE_URL="https://api.github.com/repos/$OWNER/$REPO/issues/comments/$COMMENT_ID"
+            DELETE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" "$DELETE_URL")
+            if [ "$DELETE_RESPONSE" -eq 204 ]; then
+              echo "Deleted comment with ID $COMMENT_ID."
+            else
+              echo "Error deleting comment with ID $COMMENT_ID. HTTP status code: $DELETE_RESPONSE"
+              exit 1
+            fi
+          else
+            # Update existing comment
+            UPDATE_URL="https://api.github.com/repos/$OWNER/$REPO/issues/comments/$COMMENT_ID"
+            JSON_PAYLOAD=$(jq -n --arg body "$COMMENT_IDENTIFIER \n\n$COMMENT" '{ body: $body }')
+            UPDATE_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" -d "$JSON_PAYLOAD" "$UPDATE_URL")
+            if [ "$UPDATE_RESPONSE" -eq 200 ]; then
+              echo "Updated comment with ID $COMMENT_ID."
+            elif [ "$UPDATE_RESPONSE" -eq 422 ]; then
+              echo "Error: Validation failed. HTTP status code: $UPDATE_RESPONSE"
+              exit 1
+            else
+              echo "Error updating comment with ID $COMMENT_ID. HTTP status code: $UPDATE_RESPONSE"
+              exit 1
+            fi
+          fi
+        else
+          if [ -n "$COMMENT" ]; then
+            # Add new comment
+            JSON_PAYLOAD=$(jq -n --arg body "$COMMENT_IDENTIFIER \n\n$COMMENT" '{ body: $body }')
+            ADD_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" -d "$JSON_PAYLOAD" "$API_URL")
+            if [ "$ADD_RESPONSE" -eq 201 ]; then
+              echo "Added new comment to pull request #$PR_NUMBER."
+            elif [ "$ADD_RESPONSE" -eq 403 ]; then
+              echo "Error: Request forbidden. HTTP status code: $ADD_RESPONSE"
+              exit 1
+            elif [ "$ADD_RESPONSE" -eq 404 ]; then
+              echo "Error: Resource not found. HTTP status code: $ADD_RESPONSE"
+              exit 1
+            elif [ "$ADD_RESPONSE" -eq 410 ]; then
+              echo "Error: Resource gone. HTTP status code: $ADD_RESPONSE"
+              exit 1
+            elif [ "$ADD_RESPONSE" -eq 422 ]; then
+              echo "Error: Validation failed. HTTP status code: $ADD_RESPONSE"
+              exit 1
+            else
+              echo "Error adding new comment to pull request #$PR_NUMBER. HTTP status code: $ADD_RESPONSE"
+              exit 1
+            fi
+          else
+            echo "No existing comment to delete and no new comment to add."
+          fi
+        fi
