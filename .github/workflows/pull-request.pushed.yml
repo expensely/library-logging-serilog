@@ -127,7 +127,7 @@ jobs:
         with:
           action_fail: true
           check_run_annotations: all tests, skipped tests
-          check_run: false
+          check_run: true
           comment_mode: always
           report_individual_runs: true
           files: |
